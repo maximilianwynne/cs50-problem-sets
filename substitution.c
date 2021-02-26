@@ -22,13 +22,13 @@ int main(int argc, string argv[])
         if (!(islower(argv[1][i]) || isupper(argv[1][i])))
 			return 1;
     }
-    char c;
+    char* c;
 
-    int n = strlen(argv);
+    int n = strlen(argv[1]);
 
     for (int i = 0; i < n; ++i)
     {
-        c = argv[i];
+    c = argv[i];
 
     	for(int j = 0; j < n; ++j)
     	{
@@ -38,6 +38,7 @@ int main(int argc, string argv[])
     		}
     	}
     }
+    string key = argv[1];
 
     string code = get_string("plaintext: ");
 
