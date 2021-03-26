@@ -1,5 +1,6 @@
 #include <cs50.h>
 #include <stdio.h>
+#include <string.h>
 
 // Max number of candidates
 #define MAX 9
@@ -77,6 +78,7 @@ int main(int argc, string argv[])
         {
             string name = get_string("Rank %i: ", j + 1);
 
+
             if (!vote(j, name, ranks))
             {
                 printf("Invalid vote.\n");
@@ -125,12 +127,8 @@ void record_preferences(int ranks[])
             // in ranks array
             // E.g. [0, 3, 2, 1, 4]
             preferences[ranks[i]][ranks[j]]++;
-
         }
     }
-
-
-return;
 }
 
 // Record pairs of candidates where one is preferred over the other
@@ -154,9 +152,6 @@ void add_pairs(void)
             }
         }
     }
-
-
-return;
 }
 
 // Sort pairs in decreasing order by strength of victory
@@ -174,9 +169,6 @@ void sort_pairs(void)
             }
         }
     }
-
-
-return;
 }
 
 bool cycle(int end, int cycle_start)
@@ -198,21 +190,23 @@ bool cycle(int end, int cycle_start)
             }
         }
     }
+
+    // If we do not get a cycle
+    return false;
 }
 
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
-    // Loop through pairs
-    for (int i = 0; i < pair_count; i++)
+    // Loop through candidates
+    for (int i = 0; i < candidate_count; i++)
     {
         // If cycle function returns false, lock the pair
-        if (!cycle(pairs[i].loser, pairs[i].winner))
+        if(!cycle(pairs[i].loser, pairs[i].winner))
         {
             locked[pairs[i].winner][pairs[i].loser] = true;
         }
     }
-    return;
 }
 
 // Print the winner of the election
@@ -221,7 +215,9 @@ void print_winner(void)
     // Winner is the candidate with no arrows pointing to them
     for (int i = 0; i < candidate_count; i++)
     {
-        int false_count = 0;        for (int j = 0; j < candidate_count; j++)
+        int false_count = 0;
+
+        for (int j = 0; j < candidate_count; j++)
         {
             if (locked[j][i] == false)
             {
@@ -233,5 +229,4 @@ void print_winner(void)
             }
         }
     }
-    return;
 }
