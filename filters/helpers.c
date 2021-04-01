@@ -191,3 +191,19 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
         sum_blue += temp[i + 1][j + 1].rgbtBlue;
         counter++;
     }
+
+ // MIDDLE PIXELS
+
+    // middle pixels
+    if ((i + 1 >= 0 && j + 1 >= 0) && (i + 1 < height && j + 1 < width))
+    {
+        sum_red += temp[i + 1][j + 1].rgbtRed;
+        sum_green += temp[i + 1][j + 1].rgbtGreen;
+        sum_blue += temp[i + 1][j + 1].rgbtBlue;
+        counter++;
+    }
+
+    // find the average value - sum of the value (which is the sum of the colour / number of that value)
+    image[i][j].rgbtRed = red(sum_red / counter);
+    image[i][j].rgbtBlue = blue(sum_blue / counter);
+    image[i][j].rgbtGreen = green(sum_green / counter);
