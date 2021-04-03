@@ -207,3 +207,5 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
     image[i][j].rgbtRed = red(sum_red / counter);
     image[i][j].rgbtBlue = blue(sum_blue / counter);
     image[i][j].rgbtGreen = green(sum_green / counter);
+    }
+}  
