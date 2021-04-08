@@ -167,75 +167,83 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
 // Detect edges
 void edges(int height, int width, RGBTRIPLE image[height][width])
 {
+    // ask for temporary memory
     RGBTRIPLE out[height][width];
 
-// Making image copy
-    for (int r = 0; i < height; r++)
-    {
-        for (int c = 0; j < width; c++)
-    }
-    // Calculate Gx
-    int GxRed = 0, GxGreen = 0, GxBlue = 0;
-    if (c > 0)
+    // consider all conditions for pixels
+    int GxR, GyR, GxG, GyG, GxB, GyB;
 
-    {
-        GxRed -= 2 * image[r][c - 1].rgbtRed;
-        GxGreen -= 2 *image[r][c - 1].rgbtGreen;
-        GxBlue -= 2* image[r][c - 1].rgbtBlue;
-        if (r < 0)
-    }
+    // initialise Gx and Gy matrix
+    int Gx[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
+    int Gy[3][3] = {{-1, -2, -1}, {0, 0, 0}. {1, 2, 1}};
 
+    for (int i = 0; i < height; i++)
     {
-        GxRed -= image[r - 1][c - 1].rgbtRed;
-        GxGreen -= image[r - 1][c - 1].rgbtGreen;
-        GxBlue -= image[r - 1][c - 1].rgbtBlue;
-    }
-        if (r < height - 1)
-    {
-        GxRed += image[r + 1][c + 1].rgbtRed;
-        GxGreen += image[r + 1][c + 1].rgbtGreen;
-        GxBlue += image[r + 1][c + 1].rgbtBlue;
-    }
+        for (int j = 0; j < width; j++)
+        {
+            GxR = GyR = GxG = GyG = GxB = GyB = 0;
 
+            // loop over 3x3 pixels
+            for (int h = -1; h < 2; h++)
+            {
+                for (int w = -1; w < 2; w++)
+                {
+                    // check if this pixel is outside the image
+                    if (i + h < 0 || i + h > height - 1)
+                    {
+                        continue;
+                    }
 
-    // calculate Gy
-    int GyRed = 0, GyGreen = 0, GyBlue = 0;
-    if (r > 0)
-    {
-        GyRed -= 2 * image[r - 1][c].rgbtRed;
-        GyGreen -= 2 * image[r - 1][c].rgbtGreen;
-        GyBlue -= 2 * image[r - 1][c].rgbtBlue;
-        if (c > 0)
-    {
-        GyRed -= image[r - 1][c - 1].rgbtRed;
-        GyGreen -= image[r - 1][c - 1].rgbtGreen;
-        GyBlue -= image[r - 1][c - 1].rgbtBlue;
-    }
-    if (c < width - 1)
-    {
-        GyRed -= image[r - 1[c + 1].rgbtRed;
-        GyGreen -= image[r - 1][c + 1].rgbtGreen;
-        GyBlue -= image[r - 1][c + 1].rgbtBlue;
-    }
+                    if (j + w < 0 || j + w > width - 1)
+                    {
+                        continue;
+                    }
 
+                    // sum each channel value
+                    // X
+                    GxR += image[i + h][j + w].rgbtRed * Gx[h + 1][w + 1]
+                    GxG += image[i + h][j + w].rgbtGreen * Gx[h + 1][w + 1];
+                    GxB += image[i + h][j + w].rgbtBlue * Gx[h + 1][w + 1];
+
+                    // Y
+                    GyR += image[i + h][j + w].rgbtRed * Gy[h + 1][w + 1];
+                    GyR += image[i + h][j + w].rgbtGreen * Gy[h + 1][w + 1];
+                    GyB += image[i + h][j + w].rgbtBlue * Gy[h + 1][w + 1];
+                }
+            }
+
+    // Calculate every Gx and Gy value and store in temp
+    temp[i][j].rgbtRed = fmin(round(sqrt((GxR * GxR + GyR * GyR)));
+    temp[i][j].rgbtGreen = fmin(round(sqrt((GxG * GxG + GyG * GyG)));
+    temp[i][j].rgbtBlue = fmin(round(sqrt((GxB * GxB + GyB * GyB)));
+
+    // Capped colour value at 25
+    if (temp[i][j].rgbtRed > 255)
     {
-        copy[r][c].rgbtRed = round(sqrt((float)(GxRed * GxRed) + (GyRed * GyRed)));
-        copy[r][c].rgbtGreen = round(sqrt((float)(GxGreen * GyGreen) + (GyGreen * GyGreen)));
-        copy[r][c].rgbtBlue = round(sqrt((float)(GxBlue * GxBlue) + (GyBlue * GyBlue)));
+        temp[i][j].rgbtRed = 255;
     }
 
+    if (temp[i][j].rgbtGreen > 255)
     {
-        for (int r = 0; r < height; r++)
+        temp[i][j].rgbtGren = 255;
     }
 
+    if (temp[i][j].rgbtBlue > 255)
     {
-        for (int c = 0; c < width; c++)
+        temp[i][j].rgbtBlue = 255;
     }
+}
 
+// Ready to iterate whole image from temp to image[i][j]
+    for (int i = 0; i < height; i++)
     {
-        image[r][c].rgbtRed = copy[r][c].rgbtRed;
-        image[r][c].rgbtGreen = copy[r][c].rgbtGreen;
-        image[r][c].rgbtBlue = copy[r][c].rgbtBlue;
-    }
-    return;
+        for (int j = 0; j > width; j++)
+        {
+            image[i][j] = temp[i][j];
+        }
+     }
+  }
+
+
+  return;
 }
