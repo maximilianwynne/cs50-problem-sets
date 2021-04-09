@@ -3,24 +3,20 @@
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
 {
-    for (int i = 0; i < height; i++)
+    float rgbGray;
+
+    for (int i = 0; i < width; i++)
     {
-        // iterate through each pixel row
         for (int j = 0; j < height; j++)
         {
-            // get into the 2D array, obtain value of each colour
-            int red = image[i][j].rgbtRed;
-            int blue = image[i][j].rgbtBlue;
-            int green = image[i][j].rgbtGreen;
-
-            // calculate the average pixel value for each individual channel, rounded (how to calculate average and round a result)
-            int avg = round(((float)red + (float)blue + (float)green)/3);
-
-            // set the calculated average to be the result of each pixel value
-            image[i][j].rgbtRed = image[i][j].rgbtBlue = image[i][j].rgbtGreen = avg;
-            }
+            // averages the color intensity and then applies the same value to all the colors in the surrounding pixels to get gray
+            rgbGray = round((image[j][i].rgbtBlue + image[j][i].rgbtGreen + image[j][i].rgbtRed) / 3.000);
+            // commit gray to surrounding pixels in image
+            image[j][i].rgbtBlue = rgbGray;
+            image[j][i].rgbtGreen = rgbGray;
+            image[j][i].rgbtRed = rgbGray;
+        }
     }
-    return;
 }
 
 // Reflect image horizontally
