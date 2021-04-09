@@ -1,24 +1,5 @@
 #include "helpers.h"
 
-// Convert image to grayscale
-void grayscale(int height, int width, RGBTRIPLE image[height][width])
-{
-    // creating a float type variable
-    float rgbGray;
-
-    for (int i = 0; i < width; i++)
-    {
-        for (int j = 0; j < height; j++)
-        {
-            // averages the color intensity and then applies the same value to all the colors in the surrounding pixels to get gray
-            rgbGray = round((image[j][i].rgbtBlue + image[j][i].rgbtGreen + image[j][i].rgbtRed) / 3.000);
-            // commit gray to surrounding pixels in image
-            image[j][i].rgbtBlue = rgbGray;
-            image[j][i].rgbtGreen = rgbGray;
-            image[j][i].rgbtRed = rgbGray;
-        }
-    }
-}
 
 // Reflect image horizontally
 void reflect(int height, int width, RGBTRIPLE image[height][width])
