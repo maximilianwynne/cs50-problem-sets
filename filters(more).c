@@ -3,6 +3,7 @@
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
 {
+    // creating a float type variable
     float rgbGray;
 
     for (int i = 0; i < width; i++)
