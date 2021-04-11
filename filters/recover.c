@@ -1,13 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[])
+// find first JPEG block and open it
+int main(int argc, char* argv[])
 {
-    FILE *f = fopen(filename, "r");
-    fread(filename, "r");
+    char const* const fileName = argv[1];
+    FILE* file = fopen(fileName, "r");
+    char line[1];
 
-    if (argc = 0xd8 || 0xff || 0xef
+    while (fgets(line, sizeof(line), file))
     {
-        printf()
+        printf("%s", line);
     }
+
+    fclose(file);
+
+    return 0;
 }
+
+fread(data, size, number, input);
+
+    if (buffer = 0xff || 0xd88 || 0xff)
+    {
+        buffer[0] == 0xff
+        buffer[1] == 0xd88
+        buffer[2] == 0xff
+        buffer[3] & 0xf0 == 0xe0
+    }
+
+sprintf(filename, "%03i.jpg", 2);
