@@ -3,6 +3,7 @@
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
 {
+    // iterate through each pixel column
     for (int i = 0; i < height; i++)
     {
         // iterate through each pixel row
@@ -13,7 +14,7 @@ void grayscale(int height, int width, RGBTRIPLE image[height][width])
             int blue = image[i][j].rgbtBlue;
             int green = image[i][j].rgbtGreen;
 
-            // calculate the average pixel value for each individual channel, rounded (how to calculate average and round a result)
+            // calculate the average pixel value for each individual channel and rounded
             int avg = round(((float)red + (float)blue + (float)green)/3);
 
             // set the calculated average to be the result of each pixel value
