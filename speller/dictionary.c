@@ -2,11 +2,11 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 
 #include "dictionary.h"
 
@@ -42,7 +42,7 @@ bool check(const char *word)
     } node_t;
 
     // use the nodes - create local variable which points to the first item of the list (e.g., head)
-    node_t * head = NULL;
+    node_t *head = NULL;
     head = (node_t *) malloc(sizeof(node_t));
     if (head == NULL) {
         return 1;
@@ -52,7 +52,7 @@ bool check(const char *word)
     head->next = NULL;
 
     // add a variable to the end of the list
-    node_t * head = NULL;
+    node_t *head = NULL;
     head = (node_t *) malloc(sizeof(node_t));
     head->val = 1;
     head->next = (node_t *) malloc(sizeof(node_t));
@@ -68,7 +68,7 @@ bool check(const char *word)
             n = n->next;
         }
     }
-
+}
 // Hashes word to a number
 unsigned int hash(const char *word)
 {
@@ -85,13 +85,53 @@ unsigned int hash(const char *word)
         }
         return NULL;
     }
-}
 
+    int main(void) {
+        item items[] = {
+            {"foo", 10}, {"bar", 42}, {"bazz", 36}, {"buzz", 7},
+            {"apple", 11}, {"jane", 100}, {"x", 200}};
+        size_t num_items = sizeof(items) / sizeof(item);
+
+        item* found = linear_search(items, num_items, "apple");
+        if (!found) {
+            return 1;
+        }
+        printf("linear_search: value of 'apple' is %d\n", found->value);
+        return 0;
+    }
+}
 // Loads dictionary into memory, returning true if successful else false
 bool load(const char *dictionary)
 {
-    // TODO
-    return false;
+    typedef struct node
+    {
+        char word[LENGTH + 1];
+        struct node *next;
+    }
+    node;
+
+    const int N = 300;
+    node *table[N];
+
+    // allocate memory for new node
+    node *n = malloc(sizeof(node));
+    strcpy(n->word, "apple");
+    n->next = NULL;
+
+    // find file size
+    fseek(f, 0, SEEK_END);
+    int size = ftell(f);
+    rewind(f);
+
+    // read characters from file and return EOF at end of file
+    FILE *fp
+    char buff[300]
+    fp = fopen("bible.txt", "r");
+    while(fscanf(fp, "%s", buff)!=EOF){
+
+        printf("%s ", buff );
+    }
+    fclose(fp);
 }
 
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
