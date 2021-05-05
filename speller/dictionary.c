@@ -134,11 +134,92 @@ bool load(const char *dictionary)
     fclose(fp);
 }
 
+    // run through the data through hash
+    int x = hash("apple");
+    // x is now hash
+    hashtable[x] = "apple";
+
+    // djib2 (Dan Bernstein) hash function
+    unsigned int hash(const char *word)
+    {
+	    unsigned long hash = 5381;
+	    int c = *word;
+	    // tolower - change every letter to be lowercase (to make sure words like 'And' and 'and' give the same hash result)
+	    c = tolower(c);
+	    while (*word != 0)
+
+    {
+	    hash = ((hash << 5) + hash) + c;
+	    c = *word++;
+	    c = tolower(c);
+    }
+    // change the return value to fit the size of hash table (N)
+    return hash % N;
+};
+
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
 unsigned int size(void)
 {
-    // TODO
-    return 0;
+    // Iterate over every linked list inside of the hash table
+    void* data;
+    struct list_node* next;
+};
+
+    struct list {
+    struct list_node* head;
+};
+
+    struct list* list_create() {
+        struct list* l = malloc(sizeof(struct list));
+        l->head = NULL;
+        return l;
+};
+
+    size_t list_size(struct list* l) {
+        size_t size = 0;
+        struct list_node* curr = l->head;
+        while (curr) {
+            size++;
+            curr = curr->next;
+    }
+    return size;
+};
+
+    void list_free(struct list* l, bool free_data) {
+        struct list_node* curr = l->head;
+        struct list_node* next;
+        while (curr) {
+            next = curr->next;
+            if (free_data) {
+                free(curr->data);
+            }
+            free(curr);
+            curr = next;
+    }
+    free(l);
+}
+
+void print(){
+
+    // count number of nodes within a linked list in hash table
+    // temp pointer points to head
+    struct node* temp = head;
+
+    // initialise count variable
+    int count=0;
+
+    // traverse the linked list and maintain the count
+    while(temp != NULL){
+
+        temp = temp->next;
+
+        // increment count variable
+        count++;
+
+    }
+
+    printf("\n Total no. of words in the dictionary",count);
+
 }
 
 // Unloads dictionary from memory, returning true if successful else false
