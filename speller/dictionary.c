@@ -144,7 +144,7 @@ bool load(const char *dictionary)
     {
 	    unsigned long hash = 5381;
 	    int c = *word;
-	    // tolower - change every letter to be lowercase (to make sure words like 'And' and 'and' give the same hash result)
+	    // tolower - change every letter to be lowercase (to make sure words give the same hash result)
 	    c = tolower(c);
 	    while (*word != 0)
 
@@ -197,10 +197,10 @@ unsigned int size(void)
             curr = next;
     }
     free(l);
-}
+};
 
-void print(){
-
+void print()
+{
     // count number of nodes within a linked list in hash table
     // temp pointer points to head
     struct node* temp = head;
@@ -209,7 +209,7 @@ void print(){
     int count=0;
 
     // traverse the linked list and maintain the count
-    while(temp != NULL){
+    while(temp != NULL) {
 
         temp = temp->next;
 
@@ -218,13 +218,34 @@ void print(){
 
     }
 
-    printf("\n Total no. of words in the dictionary",count);
-
+    printf("\n Total no. of words in the dictionary", count);
+    return 0;
 }
 
 // Unloads dictionary from memory, returning true if successful else false
 bool unload(void)
 {
-    // TODO
+    // free all nodes in linked list within hash table
+    void free_hashtable(void);
+
+    if (hashtable != 0)
+    {
+        for (int i = 0; i < tsize; i++)
+        {
+            hash_ptr next = 0;
+            for (hash_ptr curr = htable[i]; curr != 0; curr = next)
+            {
+                next = curr->next;
+                free(curr->word);
+                free(curr);
+            }
+        }
+        free(htable);
+        htable = 0;
+        tsize = 0;
+    }
+}
+else {
+    // if successful in unloading and reading hashtable, read false
     return false;
 }
