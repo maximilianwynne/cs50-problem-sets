@@ -141,92 +141,72 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
     }
 }
 
-#if 0
 // Detect edges
 void edges(int height, int width, RGBTRIPLE image[height][width])
 {
-    // create temp array
-    RGBTRIPLE temp[height][width];
+    RGBTRIPLE copy[height][width];
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
         {
-            temp[i][j] = image[i][j];
+            copy[i][j] = image[i][j];
         }
     }
-
-    // Initiliase Sobel arrays
-    int Gx[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
-    int Gy[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
-
-    // Loop through rows
-    for (int y = 0; y < height; y++)
+    // compute weighted sums for pixels surrounding middle pixel here by detecting edges in x and y directions
+    int Gx[3][3] =
     {
-        // Loop through columns
-        for (int x = 0; x < width; x++)
+        {-1, 0, 1},
+        {-2, 0, 2},
+        {-1, 0, 1},
+    };
+
+    int Gy[3][3] =
+    {
+        {-1, -2, -1},
+        {0, 0, 0},
+        {1, 2, 1},
+    };
+
+    for (int i = 0; i < height; i++)
+    {
+        long redx = 0, redy = 0;
+        long greenx = 0, greeny = 0;
+        long bluex = 0, bluey = 0;
+
+        for (int j = 0; j < height; j++)
         {
-            // initialise ints
-            float Gx_red;
-            float Gx_blue;
-            float Gx_green;
-            float Gy_red;
-            float Gy_blue;
-            float Gy_green;
-
-            Gx_red = Gx_blue = Gx_green = Gy_red = Gy_blue = Gy_green = 0;
-
-            // for each pixel, loop vertical and horizontal
-            for (int y2 = -1; y2 < 2; y2++)
+            // finding a pixel within the image
+            for (int h = -1; h < 2; h++)
             {
-                for (int x2 = -1; x2 < 2; x2++)
+                // finding a pixel within the image
+                for (int k = -1; k < 2; k++)
                 {
-                    // check if pixel is outside image
-                    if (y + y2 < 0 || y + y2 >= height || x + x2 < 0 || x + x2 >= width)
+                    if (i + h < 0 || i + h > width - 1 || j + k < 0 || j + k > height - 1)
                     {
                         continue;
                     }
-                    // otherwise add to sums
-                    Gx_red += temp[y + y2][x + x2].rgbtRed * Gx[y2 + x2][x2 + x2];
-                    Gx_green += temp[y + y2][x + x2].rgbtGreen * Gx[y2 + x2][x2 + x2];
-                    Gx_blue += temp[y + y2][x + x2].rgbtBlue * Gx[y2 + x2][x2 + x2];
-                    Gy_red += temp[y + y2][x + x2].rgbtRed * Gx[y2 + x2][x2 + x2];
-                    Gy_green += temp[y + y2][x + x2].rgbtGreen * Gx[y2 + x2][x2 + x2];
-                    Gy_blue += temp[y + y2][x + x2].rgbtBlue * Gx[y2 + x2][x2 + x2];
+
+                    // calculating new values
+                    redx = image[i + h][j + k].rgbtRed * Gx[h + 1][k + 1];
+                    greenx = image[i + h][j + k].rgbtGreen * Gx[h + 1][k + 1];
+                    bluex = image[i + h][j + k].rgbtBlue * Gx[h + 1][k + 1];
+                    redy = image[i + h][j + k].rgbtRed * Gy[h + 1][k + 1];
+                    greeny = image[i + h][j + k].rgbtGreen * Gy[h + 1][k + 1];
+                    bluey = image[i + h][j + h].rgbtBlue * Gy[h + 1][k + 1];
+
+                    int red = round(fmin(255, sqrt((redx^2) + (redy^2))));
+                    int green = round (fmin(255, sqrt((greenx^2) + (greeny^2))));
+                    int blue = round (fmin(255, sqrt((bluex^2) + (bluey^2))));
+
+                    copy[i][j].rgbtRed = red;
+                    copy[i][j].rgbtGreen = green;
+                    copy[i][j].rgbtBlue = blue;
                 }
             }
-
-            image[y][x].rgbtRed =
+            image[i][j].rgbtRed = copy[i][j].rgbtRed;
+            image[i][j].rgbtGreen = copy[i][j].rgbtGreen;
+            image[i][j].rgbtBlue = copy[i][j].rgbtBlue;
         }
     }
-
-
-
-    // the square root of the sum of the squares of the red, green and blue Sobel values can now be calculated to give the final
-    // values for the pixel being operated on
-    // check to make sure each value is below or at the maximum of 255, before assigning calculated values to the image pixels
-
-    // calculate sobel operator
-    int red = round(sqrt(Gx_red * Gx_red + Gy_red * Gy_red));
-    int green = round(sqrt(Gx_green * Gx_green + Gy_green * Gy_green));
-    int blue = round(sqrt(Gx_blue * Gx_blue + Gy_blue * Gy_blue));
-
-    // cap at 255
-    if (red > 255)
-    {
-        red = 255;
-    }
-    if (green > 255)
-    {
-        green = 255;
-    }
-    if (blue > 255)
-    {
-        blue = 255;
-    }
-
-    // assign new values to pixels
-    image[i][j].rgbtRed = red;
-    image[i][j].rgbtGreen = green;
-    image[i][j].rgbtBlue = blue;
+    return;
 }
-#endif
