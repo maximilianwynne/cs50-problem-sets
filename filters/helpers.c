@@ -186,7 +186,7 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
                         continue;
                     }
 
-                    // calculating new values
+                    // calculating edges in the x and y directions // try to find a way to make a sum of all the values for all 9 pixels, because right now it keeps resetting
                     redx = image[i + h][j + k].rgbtRed * Gx[h + 1][k + 1];
                     greenx = image[i + h][j + k].rgbtGreen * Gx[h + 1][k + 1];
                     bluex = image[i + h][j + k].rgbtBlue * Gx[h + 1][k + 1];
@@ -194,9 +194,11 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
                     greeny = image[i + h][j + k].rgbtGreen * Gy[h + 1][k + 1];
                     bluey = image[i + h][j + h].rgbtBlue * Gy[h + 1][k + 1];
 
-                    int red = round(fmin(255, sqrt((redx^2) + (redy^2))));
-                    int green = round (fmin(255, sqrt((greenx^2) + (greeny^2))));
-                    int blue = round (fmin(255, sqrt((bluex^2) + (bluey^2))));
+                    redx = greenx = bluex = redy = greeny = bluey >= 255.0;
+
+                    int red = round(fmin(255.0, sqrt((redx^2) + (redy^2))));
+                    int green = round (fmin(255.0, sqrt((greenx^2) + (greeny^2))));
+                    int blue = round (fmin(255.0, sqrt((bluex^2) + (bluey^2))));
 
                     copy[i][j].rgbtRed = red;
                     copy[i][j].rgbtGreen = green;
