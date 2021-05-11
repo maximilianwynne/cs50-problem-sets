@@ -27,47 +27,27 @@ const unsigned int N = 26;
 // Hash table
 node *table[N];
 
-// Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-    // hash word to obtain hash value
-    int hash_value = hash(word);
+    char localwordvar[LENGTH + 1];
+		
+    for (int i = 0; i < strlen(word); i++)
+       localwordvar[i] = tolower(word[i]);
 
-    // access linked list at that index in hash table
-    typedef struct node {
+    localwordvar[strlen(word)] = '\0';
 
-        int val;
-        struct node* = table[hash_value];
+    int head = hash(localwordvar);
+    if (hashtable[head] == NULL)
+        return false;
 
-    } node_t;
-
-    // use the nodes - create local variable which points to the first item of the list (e.g., head)
-    node_t *head = NULL;
-    head = (node_t *) malloc(sizeof(node_t));
-    if (head == NULL) {
-        return 1;
-    }
-
-    head->val = 1;
-    head->next = NULL;
-
-    // add a variable to the end of the list
-    node_t *head = NULL;
-    head = (node_t *) malloc(sizeof(node_t));
-    head->val = 1;
-    head->next = (node_t *) malloc(sizeof(node_t));
-    head->next->val = 2;
-    head->next->next = NULL;
-
-    // traverse the linked list
-    while (n != NULL)
+    node*cursor = hashtable[head];
+    while (cursor != NULL)
     {
-        if (strcasecmp(word, n->word) == 0)
-        {
+        if (strcasecmp(localwordvar, cursor->word) == 0)
             return true;
-            n = n->next;
-        }
+        cursor = cursor->next;
     }
+    return false;
 }
 // Hashes word to a number
 unsigned int hash(const char *word)
