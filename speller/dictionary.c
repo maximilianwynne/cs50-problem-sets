@@ -27,57 +27,39 @@ const unsigned int N = 26;
 // Hash table
 node *table[N];
 
+// Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-    char localwordvar[LENGTH + 1];
-		
-    for (int i = 0; i < strlen(word); i++)
-       localwordvar[i] = tolower(word[i]);
+    // hash word to obtain hash value
+    int hash_value = hash(word);
 
-    localwordvar[strlen(word)] = '\0';
+    // access linked list/hash table
+    node *n = table[hash_table]
 
-    int head = hash(localwordvar);
-    if (hashtable[head] == NULL)
-        return false;
-
-    node*cursor = hashtable[head];
-    while (cursor != NULL)
+    // traverse linked list, looking for word 'apple'
+    while (n != NULL)
     {
-        if (strcasecmp(localwordvar, cursor->word) == 0)
+        if (apple(word, n->word) == 0)
+        {
             return true;
-        cursor = cursor->next;
+        }
+
+        n = n->next;
     }
-    return false;
+
+return false;
 }
+
 // Hashes word to a number
 unsigned int hash(const char *word)
 {
-    typedef struct {
-        char *key;
-        int value;
-    } item;
+    // add ascii values of each character in the word we are looking for to find the word
+    long sum = 0;
 
-    item* linear_search(item* items, size_t size, const char* key) {
-        for (size_t i=0; i < size; i++) {
-            if (strcmp(items[i].key, key) == 0) {
-                return &items[i];
-            }
-        }
-        return NULL;
-    }
-
-    int main(void) {
-        item items[] = {
-            {"foo", 10}, {"bar", 42}, {"bazz", 36}, {"buzz", 7},
-            {"apple", 11}, {"jane", 100}, {"x", 200}};
-        size_t num_items = sizeof(items) / sizeof(item);
-
-        item* found = linear_search(items, num_items, "apple");
-        if (!found) {
-            return 1;
-        }
-        printf("linear_search: value of 'apple' is %d\n", found->value);
-        return 0;
+    for (int i = 0; i < strlen(word); i++)
+    {
+        // use modulo to get a value within the hash table
+        sum % N += tolower(word);
     }
 }
 // Loads dictionary into memory, returning true if successful else false
