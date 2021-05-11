@@ -59,8 +59,9 @@ unsigned int hash(const char *word)
     for (int i = 0; i < strlen(word); i++)
     {
         // use modulo to get a value within the hash table
-        sum % N += tolower(word);
+        sum += tolower(word);
     }
+    return sum % HASH_MAX
 }
 // Loads dictionary into memory, returning true if successful else false
 bool load(const char *dictionary)
