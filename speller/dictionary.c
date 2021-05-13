@@ -10,9 +10,6 @@
 
 #include "dictionary.h"
 
-#define MAX_WORD_LEN 50
-char** dic[MAX_WORD_LEN];
-
 // Represents a node in a hash table
 typedef struct node
 {
@@ -22,19 +19,21 @@ typedef struct node
 node;
 
 // Number of buckets in hash table
-const unsigned int N = 0;
+const unsigned int N = 100000;
 
 // Hash table
 node *table[N];
 
-// Returns true if word is in dictionary else false
+int dict_size = 0;
+
+// Returns true if word is in dictionary, else false
 bool check(const char *word)
 {
     // hash word to obtain hash value
     int hash_value = hash(word);
 
     // access linked list/hash table
-    node *n = table[hash_table]
+    node *n = table[hash_table];
 
     // traverse linked list, looking for word - strcasecomp
     while (n != NULL)
@@ -53,17 +52,17 @@ return false;
 // Hashes word to a number
 unsigned int hash(const char *word)
 {
-    int x = hash("apple")
+    // function takes string, returns index
     // add ascii values of each character in the word we are looking for to find the word
     long sum = 0;
 
     for (int i = 0; i < strlen(word); i++)
     {
         // use modulo to get a value within the hash table
-        sum += tolower(word);
+        sum += tolower(word[i]);
     }
     // adding up all ascii values in string and returning hash code modded by hash_max
-    return sum % HASH_MAX
+    return sum % N;
 }
 
 // Loads dictionary into memory, returning true if successful else false
@@ -77,12 +76,8 @@ bool load(const char *dictionary)
     // check if null / the dictionary cannot be opened
     if (dictionary == NULL)
     {
-        printf("Cannot open %s\n", dictionary);
+        printf("Unable to open %s\n", dictionary);
         return false;
-    }
-    else
-    {
-        return true;
     }
 
     // define blank char array, store each word before added to hash table
@@ -106,42 +101,21 @@ bool load(const char *dictionary)
         int hash_value = hash(next_word);
 
         // insert node into hash table at that location
-        n->table[hash_value];
+        n->next = table[hash_value];
         table[hash_value] = n;
         dict_size++;
     }
 
     // close file
-    fclose(dict_pointer || dictionary);
+    fclose(dict_pointer);
+
+return true;
 }
 
 // return dictionary size - tracking number of words as they are loading under dict_size
 unsigned int size(void)
 {
     return dict_size;
-}
-
-void print()
-{
-    // count number of nodes within a linked list in hash table
-    // temp pointer points to head
-    struct node* temp = head;
-
-    // initialise count variable
-    int count=0;
-
-    // traverse the linked list and maintain the count
-    while(temp != NULL) {
-
-        temp = temp->next;
-
-        // increment count variable
-        count++;
-
-    }
-
-    printf("\n Total no. of words in the dictionary", count);
-    return 0;
 }
 
 // Unloads dictionary from memory, returning true if successful else false
@@ -164,10 +138,11 @@ bool unload(void)
             free(tmp);
         }
 
-
         if (n == NULL && i == N - 1)
         {
             return true;
         }
     }
+
+return false;
 }
