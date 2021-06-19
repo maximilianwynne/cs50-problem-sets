@@ -1,20 +1,12 @@
-def get_change():
-    a = 0
-    while a < 25 or a > 1:
-        a = int(input("Change: "))
-    return a
+x = int(input('Please enter an amount between 0-99:'))
 
-while True:
-  change float("How much change is owned: ");
-  if fail_condition:
-    break
+print(x//25, "quarters")
+x = x % 25
 
-dollar_amount = float(input("Enter dollar amount : "))
-cents = float(dollar_amount * 100);
-print("$",dollar_amount," = ¢",cents)
+print(x//10, "dimes")
+x = x % 10
 
-amount = amount - quarters * 25
-dimes = amount // 10
-amount = amount - dimes * 10
-nickels = amount // 5
-pennies = amount - nickels * 5
+print(x//5, "nickles")
+x = x % 5
+
+print(x//1, "pennies")
