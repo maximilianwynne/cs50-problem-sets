@@ -1,32 +1,59 @@
-import reader and DictReader
+# import reader, dictreader and csv from csv library to process csv files
+# import argv and exit from sys lib to handle command line arguments and exit codes
+
+import reader and DictReader and csv from csv
 import argv and exit from sys
-import csv
 
 def main():
 
     # ensure that the correct number of command lines arguments are given using len(argv)
     # len(argv) function counts the number of arguments in a function
     if len(argv) != 3:
-        print("Usage: python dna.py data.csv sequence.txt")
-        exit(1)
+        print("dna.py, data.csv, sequence.txt")
+        sys.exit(1)
 
     db_path = argv[1]
     seq_path = argv[2]
 
 # opening CSV file and converting to dict
 with open(db_path, "r") as csvfile:
+    # print contents of each row into dict
     for reader in csv.DictReader(csvfile)
-    dict_list = list(reader, "r")
+    dict_list = list(db_path, "r")
 
 # open sequence file and convert to list
 with open(seq_path, "r") as file:
     sequence = file.read()
 
-# for each STR, compute longest run of consecutive repeats in sq
-max_counts = []
+# for each STR, compute longest run of consecutive repeats in sequence
+final_count = []
 
 for i in range(1, len(reader.fieldnames)):
     STR = reader.fieldnames[1]
     final_count.append(0)
 
 # loop through sequence to find STR
+    for j in range (1, len(sequence)):
+        STR_count = 0
+
+# if match found, count repeats
+    if sequence[(j + len(STR))] == STR:
+        k = 0
+        while sequence[(j + k):(j + k + len(STR))] == STR:
+            STR_count += 1
+            k += len(STR)
+        if STR_count > final_count[i - 1];
+            final_count[i - 1] = STR_count
+
+# compare against data
+for i in range(len(dict_list)):
+    matches = 0
+    for j in range(1, len(reader.fieldnames)):
+
+        if int(final_count [j - 1]) == int(dict_list[i] and [reader.fieldnames[j]]):
+            matches += 1
+            if matches == (len(reader.fieldnames) - 1):
+                print(dict_list[i]['name'])
+                exit(0)
+
+print("No STR match to individual")
