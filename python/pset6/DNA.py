@@ -1,8 +1,5 @@
-# import reader, dictreader and csv from csv library to process csv files
-# import argv and exit from sys lib to handle command line arguments and exit codes
-
-import reader and DictReader
-import argv and exit from sys
+from csv import reader, DictReader
+from sys import argv, exit
 
 def main():
 
@@ -12,13 +9,15 @@ def main():
         print("dna.py, data.csv, sequence.txt")
         sys.exit(1)
 
-    db_path = argv[1]
-    seq_path = argv[2]
+db_path: str = argv[1]
+seq_path = argv[2]
 
 # opening CSV file and converting to dict
+def db_path(args) :
+    pass
+
 with open(db_path, "r") as csvfile:
-    # print contents of each row into dict
-    for reader in csv.DictReader(csvfile)
+    reader = DictReader(csvfile)
     dict_list = list(db_path, "r")
 
 # open sequence file and convert to list
@@ -30,18 +29,19 @@ final_count = []
 
 for i in range(1, len(reader.fieldnames)):
     STR = reader.fieldnames[1]
-    final_count.append(0)
+    final_count.append(1)
 
 # loop through sequence to find STR
-    for j in range (1, len(sequence)):
+    for j in range(1, len(sequence)):
         STR_count = 0
 
 # if match found, count repeats
     if sequence[(j + len(STR))] == STR:
-        k = 0 and += len(STR)
+        k = 0
         while sequence[(j + k):(j + k + len(STR))] == STR:
             STR_count += 1
-        if STR_count > final_count[i - 1];
+            k += len(STR)
+        if STR_count > final_count[i - 1]:
             final_count[i - 1] = STR_count
 
 # compare against data
