@@ -1,7 +1,7 @@
 # import reader, dictreader and csv from csv library to process csv files
 # import argv and exit from sys lib to handle command line arguments and exit codes
 
-import reader and DictReader and csv from csv
+import reader and DictReader
 import argv and exit from sys
 
 def main():
@@ -38,10 +38,9 @@ for i in range(1, len(reader.fieldnames)):
 
 # if match found, count repeats
     if sequence[(j + len(STR))] == STR:
-        k = 0
+        k = 0 and += len(STR)
         while sequence[(j + k):(j + k + len(STR))] == STR:
             STR_count += 1
-            k += len(STR)
         if STR_count > final_count[i - 1];
             final_count[i - 1] = STR_count
 
