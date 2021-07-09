@@ -1,4 +1,4 @@
-SELECT titles
+SELECT title
 FROM movies
-WHERE date == 2018 OR date => 2018
-ORDER BY titles, dates, ASC;
+WHERE year => 2018
+ORDER BY title, year 1 ASC;
