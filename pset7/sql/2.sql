@@ -1,1 +1,1 @@
-SELECT EMMA STONE, birth year FROM movies.db;
+SELECT COUNT(DISTINCT year) FROM 'Emma Stone' FROM movies;
