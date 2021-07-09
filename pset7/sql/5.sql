@@ -1,3 +1,4 @@
-SELECT title, release years
-FROM movies.db
-WHERE name LIKE "Harry Potter" ASC;
+SELECT title, year
+FROM movies
+WHERE name LIKE "Harry Potter" 
+ORDER BY 1 ASC;
