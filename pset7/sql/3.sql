@@ -1,4 +1,4 @@
 SELECT titles
-FROM movies.db
-WHERE date == 2018 or date => 2018
+FROM movies
+WHERE date == 2018 OR date => 2018
 ORDER BY titles, dates, ASC;
