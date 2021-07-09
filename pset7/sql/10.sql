@@ -1,5 +1,6 @@
 SELECT DISTINCT(people.name) from directors
-JOIN directors ON directors.person_id = directors.id
-JOIN movies ON stars.movie_id = movies.id
-WHERE movies.score <= 9.0
+JOIN directors ON directors.id = directors.person_id
+JOIN movies ON directors.movie_id = movies.id
+JOIN ratings ON movies.id = ratings.movie_id
+WHERE movies.score => 9.0
 ORDER BY movies.score;
