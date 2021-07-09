@@ -1,4 +1,4 @@
 SELECT title
 FROM movies
 WHERE year => 2018
-ORDER BY title, year 1 ASC;
+ORDER BY 1 ASC;
