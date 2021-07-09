@@ -1,3 +1,3 @@
-SELECT MAX(score)
-FROM movies.db
-WHERE movies = 10.0;
+SELECT MAX(rating)
+FROM movies
+WHERE rating = 10.0;
