@@ -1,1 +1,1 @@
-SELECT DISTINCT movies FROM movies.db WHERE year = 2008;
+SELECT titles FROM movies WHERE year = 2008;
