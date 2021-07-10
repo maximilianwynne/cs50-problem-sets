@@ -24,16 +24,12 @@ open(argv[1], newline='') as charactersFile("characters.csv"):
         studentName = name.first, name.middle, name.last
         studentName = character.split()
         if len(studentName) < 3:
-            exec("insert into students.db(first, middle, last, house, birth")
+            db.execute("insert into students.db(first, middle, last, house, birth")
             VALUES = name.first(?), name.middle(?), name.last(?), house(?), birth(?)
-            name.first[0], name.middle[None], name.last[0]
+            name.first[0], name.middle[None], name.last[1], character[1], character[2]
 
         else:
-            exec()
-
-
-
-
-db.execute("QUERY")
+            db.execute("ineert into students.db9first, middle, last, house, birth")
+            name.first[0], name.middle[1], name.last[1], character[1], character[2]
 
 print(row)
