@@ -26,5 +26,5 @@ with open(sys.argv[1], "r") as characters:
             first_name = name_list[0]
             middle_name = name_list[1]
             last_name = name_list[2]
-            db.execute("INSERT INTO students (first, midle, last, house, birth) VALUES(?, ?, ?, ?, ?)",
-                       first_name, middle_name, last_name, row["house"], row["birth])    
+            db.execute("INSERT INTO students (first, middle, last, house, birth) VALUES(?, ?, ?, ?, ?)",
+                       first_name, middle_name, last_name, row["house"], row["birth"])    
