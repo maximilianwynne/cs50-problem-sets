@@ -29,7 +29,7 @@ open(argv[1], newline='') as charactersFile("characters.csv"):
             name.first[0], name.middle[None], name.last[1], character[1], character[2]
 
         else:
-            db.execute("ineert into students.db9first, middle, last, house, birth")
+            db.execute("insert into students.db9first, middle, last, house, birth")
             name.first[0], name.middle[1], name.last[1], character[1], character[2]
 
 print(row)
