@@ -8,7 +8,39 @@
 
         <script>
 
-            // TODO: Add code to check answers to questions
+            function displayAnswer1() {
+                if (document.getElementById('option-11').checked) {
+                  document.getElementById('block-11').style.border = '3px solid limegreen'
+                  document.getElementById('result-11').style.colour = 'limegreen'
+                  document.getElementById('result-11').innerHTML = 'Correct!'
+                  document.getElementById('change').onclick = changColour;
+                  document.body.style.colour = "green";
+                  return false;
+                }
+
+                }
+                if (document.getElementById('option-12').checked) {
+                  document.getElementById('block-12').style.border = '3px solid red'
+                  document.getElementById('result-12').style.colour = 'red'
+                  document.getElementById('result-12').innerHTML = 'Incorrect!'
+                  showCorrectAnswer1()
+                }
+                if (document.getElementById('option-13').checked) {
+                  document.getElementById('block-13').style.border = '3px solid red'
+                  document.getElementById('result-13').style.colour = 'red'
+                  document.getElementById('result-13').innerHTML = 'Incorrect!'
+                  showCorrectAnswer1()
+                }
+                if (document.getElementById('option-14').checked) {
+                  document.getElementById('block-14').style.border = '3px solid red'
+                  document.getElementById('result-14').style.colour = 'red'
+                  document.getElementById('result-14').innerHTML = 'Incorrect!'
+                  showCorrectAnswer1()
+                }
+
+            var span = document.getElementById("your id").style.colour = "your colour";
+
+            document.body.style.backgroundColour = "your colour";
 
         </script>
 
