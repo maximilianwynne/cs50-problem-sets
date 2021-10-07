@@ -40,15 +40,17 @@
           </tr>
         </thead>
         <tbody>
-          {% for stock in data: %}
+          {% for symbol, stock in portfolios.items(): %}
+          {% if stock.shares > 0: %}
           <tr>
             <td>{{loop.index}}</td>
-            <td>{{stock.symbol}}</td>
+            <td>{{symbol}}</td>
             <td>{{stock.name}}</td>
             <td>{{stock.shares}}</td>
             <td>{{stock.price}}</td>
             <td class="text-warning">{{stock.value}}</td>
           </tr>
+          {% endif %}
           {% endfor %}
         </tbody>
       </table>
@@ -76,13 +78,13 @@
         </thead>
 
         <tbody>
-          {% for stock in data['stocks']: %}
+          {% for transaction in transactions: %}
           <tr>
             <td>{{loop.index}}</td>
-            <td>{{stock.symbol}}</td>
-            <td>{{stock.name}}</td>
-            <td>{{stock.shares}}</td>
-            <td>{{stock.price}}</td>
+            <td>{{transaction.symbol}}</td>
+            <td>{{transaction.name}}</td>
+            <td>{{transaction.shares}}</td>
+            <td>{{transaction.price}}</td>
           </tr>
           {% endfor %}
           <tr>
@@ -100,6 +102,7 @@
       </table>
     </div>
   </div>
+
 </div>
 {% endblock %}
 
