@@ -39,10 +39,9 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-# db.execute("DROP TABLE transactions")
-# db.execute("DROP TABLE portfolios")
-# db.execute("CREATE TABLE transactions (user_id text, type text, symbol text, shares int, price int)")
-# db.execute("CREATE TABLE portfolios (user_id text, symbol text, shares int)")
+#db.execute("DROP TABLE transactions")
+#db.execute("DROP TABLE portfolios")
+#db.execute("CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id text, date int, type text, symbol text, shares int, price int)")
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -55,25 +54,38 @@ def index():
     """Show portfolio of stocks"""
 
     # Query database for user's stocks
-    stocks = db.execute("SELECT symbol, shares FROM portfolios WHERE user_id = :user_id ORDER BY symbol DESC",
+    db_transactions = db.execute("SELECT symbol, shares, price FROM transactions WHERE user_id = :user_id ORDER BY symbol DESC",
                     user_id = session["user_id"])
 
     # Ensure user has stocks
-    if not stocks:
+    if not db_transactions:
         return render_template("index.html", message = "Portfolio is empty.")
 
     # Set total at 0
     total = 0
 
-    data = []
+    portfolios = {}
+    transactions = []
+
 
     # Add company name, current price and current stock value to stocks
-    for stock in stocks:
-        stock_data = lookup(stock["symbol"])
-        price = stock_data["price"]
-        value = price * stock["shares"]
-        total = total + value
-        data.append({"name": stock_data["name"], "price": price, "value": value, "symbol": stock["symbol"], "shares": stock["shares"]})
+    for transaction in db_transactions:
+        symbol = transaction["symbol"]
+        if symbol not in portfolios:
+            stock_data = lookup(transaction["symbol"])
+            name = stock_data["name"]
+            price = stock_data["price"]
+            value = price * transaction["shares"]
+            total = total + value
+            portfolios[symbol] = {"name": name, "price": price, "value": value, "shares": transaction["shares"]}
+        else:
+            name = portfolios[symbol]["name"]
+            portfolios[symbol]["shares"] += transaction["shares"]
+            portfolios[symbol]["value"] += transaction["shares"] * portfolios[symbol]["price"]
+            total += transaction["shares"] * portfolios[symbol]["price"]
+
+        transactions.append({"name":name, "price": transaction["price"], "value": transaction["price"] * transaction["shares"], "shares": transaction["shares"], "symbol": symbol})
+    print(transactions)
 
     # Query database to get user's cash balance
     balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
@@ -83,7 +95,7 @@ def index():
     total = total + balance
 
     # Render homepage
-    return render_template("index.html", data=data, balance = usd(balance), value = usd(total))
+    return render_template("index.html", portfolios=portfolios, transactions=transactions, balance = usd(balance), value = usd(total))
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -128,9 +140,9 @@ def buy():
         #     price = format(total_price, '.2f')
 
         # Query database to insert transaction
-        db.execute("INSERT INTO transactions (user_id, createddate, symbol, shares, price) VALUES (:user_id, :createddate, :symbol, :shares, :price)",
+        db.execute("INSERT INTO transactions (user_id, date, symbol, shares, price) VALUES (:user_id, :date, :symbol, :shares, :price)",
             user_id = session["user_id"],
-            createddate = date.today(),
+            date = 0, # date.today(),
             symbol = input_symbol,
             shares = int(input_shares),
             price = format(total_price,".2f"))
@@ -144,29 +156,29 @@ def buy():
             balance = user_balance)
 
         # Query database for user's portfolio
-        portfolio = db.execute("SELECT shares FROM portfolios WHERE user_id = :user_id AND symbol = :symbol",
-                        user_id = session["user_id"],
-                        symbol = input_symbol)
-
-        # In case user already does have shares for purchased stock
-        if len(portfolio) == 1:
-
-            # Calculate new number of shares based on current amount and purchased amount
-            shares = portfolio[0]["shares"] + int(input_shares)
-
-            # Query database to update portfolios for newly purchased shares
-            db.execute("UPDATE portfolios SET shares = :shares WHERE user_id = :user_id AND symbol = :symbol",
-                user_id = session["user_id"],
-                symbol = input_symbol,
-                shares = shares)
-
-        # In case user doesn't already have shares for purchased stock
-        else:
-            # Query database to insert newly purchased shares info into portfolios
-            db.execute("INSERT INTO portfolios (user_id, symbol, shares) VALUES (:user_id, :symbol, :shares)",
-                user_id = session["user_id"],
-                symbol = input_symbol,
-                shares = int(input_shares))
+        # portfolio = db.execute("SELECT shares FROM portfolios WHERE user_id = :user_id AND symbol = :symbol",
+        #                 user_id = session["user_id"],
+        #                 symbol = input_symbol)
+        #
+        # # In case user already does have shares for purchased stock
+        # if len(portfolio) == 1:
+        #
+        #     # Calculate new number of shares based on current amount and purchased amount
+        #     shares = portfolio[0]["shares"] + int(input_shares)
+        #
+        #     # Query database to update portfolios for newly purchased shares
+        #     db.execute("UPDATE portfolios SET shares = :shares WHERE user_id = :user_id AND symbol = :symbol",
+        #         user_id = session["user_id"],
+        #         symbol = input_symbol,
+        #         shares = shares)
+        #
+        # # In case user doesn't already have shares for purchased stock
+        # else:
+        #     # Query database to insert newly purchased shares info into portfolios
+        #     db.execute("INSERT INTO portfolios (user_id, symbol, shares) VALUES (:user_id, :symbol, :shares)",
+        #         user_id = session["user_id"],
+        #         symbol = input_symbol,
+        #         shares = int(input_shares))
 
         # Get company name
         name = lookup(input_symbol)["name"]
@@ -370,9 +382,9 @@ def sell():
         price = lookup(input_symbol)["price"] * int(input_shares)
 
         # Query database to insert transaction
-        db.execute("INSERT INTO transactions (user_id, createddate, symbol, shares, price) VALUES (:user_id, :createddate, :symbol, :shares, :price)",
+        db.execute("INSERT INTO transactions (user_id, date, symbol, shares, price) VALUES (:user_id, :date, :symbol, :shares, :price)",
             user_id = session["user_id"],
-            createddate = date.today(),
+            date = 0,
             symbol = input_symbol,
             shares = int(input_shares),
             price = format(price,".2f"))
