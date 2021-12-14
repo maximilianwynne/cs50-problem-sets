@@ -1,17 +1,17 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+    Sell
 {% endblock %}
 
 {% block main %}
 <h1 class="display-4">Sell Stocks</h1>
 <form action="/sell" method="post">
   <div class="form-group">
-    <select class="form-control" name="symbol">
+    <select class="form-control" name="symbol" id="symbol" width="250">
       <option disabled selected>Stock Symbol</option>
-      {% for stock in stocks %}
-      <option value="{{ stock.symbol }}">{{ stock.symbol }}</option>
+      {% for symbol in symbols %}
+      <option value="{{ symbol }}">{{ symbol }}</option>
       {% endfor %}
     </select>
   </div>
@@ -21,7 +21,8 @@
       class="form-control"
       name="shares"
       placeholder="Number of Shares"
-      type="text"
+      type="number"
+      min="1"
     />
   </div>
   <button class="btn btn-primary" type="submit">Sell</button>
