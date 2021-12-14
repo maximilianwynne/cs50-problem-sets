@@ -129,7 +129,10 @@ def buy():
 
         # Check if user has enough cash based on stock's current price
         if total_price > user_balance:
-            return apology("insufficient funds", 403)
+
+            flash(f"Insufficent funds")
+            return render_template("buy.html")
+            # return apology("insufficient funds", 403)
 
         # SQL = "INSERT INTO transactions (user_id, type, symbol, shares, price) VALUES (session_id, :transaction_type, :symbol, :shares, :price" + "(user_id + type + symbol + shares + price)";
         #
@@ -370,12 +373,18 @@ def sell():
             return apology("number of shares must be a positive integer", 403)
 
         # Query database for user's portfolio
-        stocks = db.execute("SELECT shares FROM portfolios WHERE user_id = :user_id AND symbol = :symbol",
+        transactions = db.execute("SELECT shares FROM transactions WHERE user_id = :user_id AND symbol = :symbol",
                         user_id = session["user_id"],
                         symbol = input_symbol)
 
+        num_shares_owned = 0
+        print(transactions, input_symbol)
+        for transaction in transactions:
+            num_shares_owned += transaction["shares"]
+
         # Ensure user has enough shares for selected symbol
-        if len(stocks) != 1 or stocks[0]["shares"] < int(input_shares):
+        print(num_shares_owned, input_shares)
+        if num_shares_owned < int(input_shares):
             return apology("not enough shares", 403)
 
         # Calculate total price based on number of shares and stock's current price
@@ -386,29 +395,29 @@ def sell():
             user_id = session["user_id"],
             date = 0,
             symbol = input_symbol,
-            shares = int(input_shares),
+            shares = -int(input_shares),
             price = format(price,".2f"))
 
-    # Query database for how much cash user currently has
-        balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
-                        user_id = session["user_id"])[0]["cash"]
-
-        # Calculate user's new cash balance after purchase
-        balance = balance + price
-
-        # Query database to update user's cash balance
-        db.execute("UPDATE users SET cash = :balance WHERE id = :user_id",
-            user_id = session["user_id"],
-            balance = balance)
-
-        # Calculate new share amount
-        shares = stocks[0]["shares"] - int(input_shares)
-
-        # Query database to update user's portfolio
-        db.execute("UPDATE portfolios SET shares = :shares WHERE user_id = :user_id AND symbol = :symbol",
-            user_id = session["user_id"],
-            symbol = input_symbol,
-            shares = shares)
+    # # Query database for how much cash user currently has
+    #     balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
+    #                     user_id = session["user_id"])[0]["cash"]
+    #
+    #     # Calculate user's new cash balance after purchase
+    #     balance = balance + price
+    #
+    #     # Query database to update user's cash balance
+    #     db.execute("UPDATE users SET cash = :balance WHERE id = :user_id",
+    #         user_id = session["user_id"],
+    #         balance = balance)
+    #
+    #     # Calculate new share amount
+    #     shares = stocks[0]["shares"] - int(input_shares)
+    #
+    #     # Query database to update user's portfolio
+    #     db.execute("UPDATE portfolios SET shares = :shares WHERE user_id = :user_id AND symbol = :symbol",
+    #         user_id = session["user_id"],
+    #         symbol = input_symbol,
+    #         shares = shares)
 
         # Get company name
         name = lookup(input_symbol)["name"]
@@ -422,11 +431,16 @@ def sell():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         # Query database for stocks where user_id is equal to logged in user id
-        stocks = db.execute(
-            "SELECT symbol FROM portfolios WHERE user_id =:user_id ORDER BY symbol ASC",
+        transactions = db.execute(
+            "SELECT symbol, shares FROM transactions WHERE user_id =:user_id ORDER BY symbol ASC",
                         user_id = session["user_id"])
 
-        return render_template("sell.html", stocks = stocks)
+        symbols = set()
+        for transaction in transactions:
+            symbols.add(transaction["symbol"])
+
+
+        return render_template("sell.html", symbols = symbols)
 
 
 @app.route("/wallet", methods=["GET", "POST"])
