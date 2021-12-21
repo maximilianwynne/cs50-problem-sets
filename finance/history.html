@@ -6,7 +6,7 @@
 
 {% block main %}
 <h1 class="display-4">Transaction History</h1>
-<table class="table table-striped" style="width:100%">
+<table class="table table-sm table-bordered">
   <thead>
     <tr>
       <th scope="col">Date</th>
@@ -14,16 +14,19 @@
       <th scope="col">Symbol</th>
       <th scope="col">Shares</th>
       <th scope="col">Price</th>
+      <th scope="col">Value</th>
     </tr>
   </thead>
+
   <tbody>
-    {% for transaction in transactions %}
+    {% for transaction in transactions: %}
     <tr>
-      <td scope="row">{{ date }}</td>
-      <td scope="row">{{ type }}</td>
-      <td scope="row">{{ symbol }}</td>
-      <td scope="row">{{ shares }}</td>
-      <td scope="row">{{ price }}</td>
+      <td scope="row">{{ transaction.date }}</td>
+      <td scope="row">{{ transaction.type }}</td>
+      <td scope="row">{{ transaction.symbol }}</td>
+      <td scope="row">{{ transaction.shares }}</td>
+      <td scope="row">{{ transaction.price }}</td>
+      <td scope="row">{{ transaction.value }}</td>
     </tr>
     {% endfor %}
   </tbody>
