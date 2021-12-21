@@ -7,7 +7,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import date
+import datetime
 
 from helpers import apology, login_required, lookup, usd
 
@@ -65,7 +65,6 @@ def index():
     total = 0
 
     portfolios = {}
-    transactions = []
 
 
     # Add company name, current price and current stock value to stocks
@@ -79,13 +78,9 @@ def index():
             total = total + value
             portfolios[symbol] = {"name": name, "price": price, "value": value, "shares": transaction["shares"]}
         else:
-            name = portfolios[symbol]["name"]
             portfolios[symbol]["shares"] += transaction["shares"]
             portfolios[symbol]["value"] += transaction["shares"] * portfolios[symbol]["price"]
             total += transaction["shares"] * portfolios[symbol]["price"]
-
-        transactions.append({"name":name, "price": transaction["price"], "value": transaction["price"] * transaction["shares"], "shares": transaction["shares"], "symbol": symbol})
-    print(transactions)
 
     # Query database to get user's cash balance
     balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
@@ -95,7 +90,7 @@ def index():
     total = total + balance
 
     # Render homepage
-    return render_template("index.html", portfolios=portfolios, transactions=transactions, balance = usd(balance), value = usd(total))
+    return render_template("index.html", portfolios=portfolios, balance = usd(balance), value = usd(total))
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -130,22 +125,15 @@ def buy():
         # Check if user has enough cash based on stock's current price
         if total_price > user_balance:
 
+            # flash insufficient funds instead of returning apology
             flash(f"Insufficent funds")
             return render_template("buy.html")
             # return apology("insufficient funds", 403)
 
-        # SQL = "INSERT INTO transactions (user_id, type, symbol, shares, price) VALUES (session_id, :transaction_type, :symbol, :shares, :price" + "(user_id + type + symbol + shares + price)";
-        #
-        #     user_id = session["user_id"],
-        #     transaction_type = "purchase",
-        #     symbol = input_symbol,
-        #     shares = int(input_shares),
-        #     price = format(total_price, '.2f')
-
         # Query database to insert transaction
         db.execute("INSERT INTO transactions (user_id, date, symbol, shares, price) VALUES (:user_id, :date, :symbol, :shares, :price)",
             user_id = session["user_id"],
-            date = 0, # date.today(),
+            date = datetime.datetime.now(),
             symbol = input_symbol,
             shares = int(input_shares),
             price = format(total_price,".2f"))
@@ -202,11 +190,41 @@ def buy():
 def history():
     """Show history of transactions"""
 
-    # Query data for history of transactions
-    transactions = db.execute("SELECT date, type, symbol, shares, price FROM transactions WHERE user_id = :user_id ORDER BY date DESC",
-                        user_id = session["user_id"])
+    # Query database for user's stocks
+    db_transactions = db.execute(
+        "SELECT symbol, shares, price, date FROM transactions WHERE user_id = :user_id ORDER BY symbol DESC",
+        user_id=session["user_id"])
 
-    return render_template("history.html", transactions = transactions)
+    # Ensure user has stocks
+    if not db_transactions :
+        return render_template("index.html", message="Portfolio is empty.")
+
+    # Set total at 0
+    total = 0
+
+    stock_names = {}
+    transactions = []
+
+    # db.transactions - go through transactions and store the names of each stock (no need to re-look up stock names)
+    #
+    for transaction in db_transactions:
+        symbol = transaction["symbol"]
+        if symbol not in stock_names: # if stock not found, store it
+            stock_data = lookup(transaction["symbol"])
+            name = stock_data["name"]
+            stock_names[symbol] = name
+        else:
+            name = stock_names[symbol] # use
+
+        type = "Buy" if transaction["shares"] > 0 else "Sell"
+
+        transactions.append(
+            {"name": name, "price": transaction["price"], "value": transaction["price"] * abs(transaction["shares"]),
+             "shares": abs(transaction["shares"]), "symbol": symbol, "date": transaction["date"], "type": type})
+
+    print(transactions)
+
+    return render_template("history.html", transactions=transactions)
 
 
 @app.route("/login", methods=["GET", "POST"])
