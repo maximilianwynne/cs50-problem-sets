@@ -15,10 +15,14 @@
   {% endif %}
   <div class="col">
     <div class="row">
-      <div class="col-2 card bg-primary" id="balance"></div>
-      <div class="col-2 card bg-info pull-right" id="Tbalance"></div>
+      <div class="col-2 card bg-primary" id="balance">Cash Balance: {{cash}}</div>
       <div class="col-2" id="">
-        <h6 class="to-center btn btn-success add-cash img-circle">Add cash<br><i class="icofont icofont-ui-add"></i></h6>
+        <h6 class="to-center btn btn-success add-cash img-circle">Add cash</i></h6>
+        <form action="/addcash" method="post">
+          <input type="number" id="cash" name="cash">
+          <input type="submit" value="Add cash">
+        </form>
+
       </div>
     </div>
   </div>
