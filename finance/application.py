@@ -67,7 +67,7 @@ def index():
     portfolios = {}
 
 
-    # Add company name, current price and current stock value to stocks
+    # Add company name, current price and current stock value to stocks - adding stocks
     for transaction in db_transactions:
         symbol = transaction["symbol"]
         if symbol not in portfolios:
@@ -83,14 +83,13 @@ def index():
             total += transaction["shares"] * portfolios[symbol]["price"]
 
     # Query database to get user's cash balance
-    balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
-                    user_id = session["user_id"])[0]["cash"]
+    balance = get_cash(session["user_id"])
 
     # Calculate stocks value grand total
     total = total + balance
 
     # Render homepage
-    return render_template("index.html", portfolios=portfolios, balance = usd(balance), value = usd(total))
+    return render_template("index.html", portfolios=portfolios, balance = usd(balance), value = usd(total), cash=usd(balance))
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -115,15 +114,15 @@ def buy():
         elif int(input_shares) <= 0:
             return apology("number of shares must be a positive integer", 403)
 
-        # Query database for how much cash user currently has
-        user_balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
-                          user_id = session["user_id"])[0]["cash"]
+        user_balance = get_cash(session["user_id"])
 
         # Calculate total price based on number of shares and stock's current price
         total_price = lookup(input_symbol)["price"] * int(input_shares);
 
         # Check if user has enough cash based on stock's current price
         if total_price > user_balance:
+
+            # print(total_price, user_balance)
 
             # flash insufficient funds instead of returning apology
             flash(f"Insufficent funds")
@@ -133,7 +132,7 @@ def buy():
         # Query database to insert transaction
         db.execute("INSERT INTO transactions (user_id, date, symbol, shares, price) VALUES (:user_id, :date, :symbol, :shares, :price)",
             user_id = session["user_id"],
-            date = datetime.datetime.now(),
+            date = datetime.datetime.now(), # python function to date transactions
             symbol = input_symbol,
             shares = int(input_shares),
             price = format(total_price,".2f"))
@@ -185,6 +184,13 @@ def buy():
         return render_template("buy.html")
 
 
+def get_cash(user_id) :
+    # Query database for how much cash user currently has
+    user_balance = db.execute("SELECT cash FROM users WHERE id = :user_id",
+                              user_id=user_id)[0]["cash"]
+    return user_balance
+
+
 @app.route("/history")
 @login_required
 def history():
@@ -192,7 +198,7 @@ def history():
 
     # Query database for user's stocks
     db_transactions = db.execute(
-        "SELECT symbol, shares, price, date FROM transactions WHERE user_id = :user_id ORDER BY symbol DESC",
+        "SELECT symbol, shares, price, date FROM transactions WHERE user_id = :user_id ORDER BY date DESC",
         user_id=session["user_id"])
 
     # Ensure user has stocks
@@ -202,6 +208,7 @@ def history():
     # Set total at 0
     total = 0
 
+    # get list of stock names and transactions
     stock_names = {}
     transactions = []
 
@@ -214,10 +221,12 @@ def history():
             name = stock_data["name"]
             stock_names[symbol] = name
         else:
-            name = stock_names[symbol] # use
+            name = stock_names[symbol] # if stock is found, use stocks
 
+        # type section for transactions in trans history table. Buy transactions if it's over 0; if not, type to sell.
         type = "Buy" if transaction["shares"] > 0 else "Sell"
 
+        # abs (abs(transaction["shares"]) returns a whole/abs value for number for each transaction
         transactions.append(
             {"name": name, "price": transaction["price"], "value": transaction["price"] * abs(transaction["shares"]),
              "shares": abs(transaction["shares"]), "symbol": symbol, "date": transaction["date"], "type": type})
@@ -287,7 +296,7 @@ def logout():
 def quote():
     """Get stock quote."""
 
-    # User reached route via POST (as by submitting a form via POST)
+    # User reached route via POST (submitting form by post)
     if request.method == "POST":
 
         # Assign inputs to variables
@@ -297,17 +306,17 @@ def quote():
         if not input_symbol:
             return apology("must provide symbol", 403)
 
-        # Ensure quote symbol exist in the stock data
+        # Ensure quote symbol exists in the stock data
         elif not lookup(input_symbol):
             return apology("stock not found", 403)
 
-        # Get quote info
+        # get quote info
         quote = lookup(input_symbol)
 
-        # Format price to usd
+        # format price to usd
         quote["price"] = usd(quote["price"])
 
-        return render_template("quoted.html", quote = quote)
+        return render_template("quoted.html", quote=quote)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -334,7 +343,7 @@ def register():
         elif not input_password:
             return apology("must provide password", 403)
 
-        # Ensure passwsord confirmation was submitted
+        # Ensure password confirmation was submitted
         elif not input_confirmation:
             return apology("must provide password confirmation", 418)
 
