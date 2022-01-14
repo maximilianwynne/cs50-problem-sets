@@ -470,9 +470,9 @@ def sell():
         return render_template("sell.html", symbols = symbols)
 
 
-@app.route("/wallet", methods=["GET", "POST"])
+@app.route("/addcash", methods=["GET", "POST"])
 @login_required
-def wallet():
+def addcash():
     """Add more cash."""
 
     # User reached route via POST (as by submitting a form via POST)
@@ -488,17 +488,13 @@ def wallet():
         # Query database to update user's cash amount
         db.execute("UPDATE users SET cash = cash + :amount WHERE id = :user_id",
             user_id = session["user_id"],
-            amount = input_amount)
+            amount = input_amount,
+            cash = addcash)
 
         # Flash info for the user
         flash(f"Added {usd(int(input_amount))} to your account")
 
-        # Redirect user to homepage
-        return redirect("/")
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("wallet.html")
+        return render_template("index.html")
 
 
 def errorhandler(e):
