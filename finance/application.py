@@ -477,24 +477,28 @@ def addcash():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+        try:
+            # Assign input to variable
+            input_amount = float(request.form.get("cash"))
+        except ValueError:
+            # Ensure cash amount was submitted
+            flash("must provide amount of cash to add")
+            return redirect("/")
 
-        # Assign input to variable
-        input_amount = request.form.get("amount")
-
-        # Ensure cash amount was submitted
-        if not input_amount:
-            return apology("must provide amount of cash to add", 403)
+        if input_amount <= 0:
+            flash("Added amount must be positive")
+            return redirect("/")
 
         # Query database to update user's cash amount
+        print(input_amount, type(input_amount))
         db.execute("UPDATE users SET cash = cash + :amount WHERE id = :user_id",
             user_id = session["user_id"],
-            amount = input_amount,
-            cash = addcash)
+            amount = input_amount)
 
         # Flash info for the user
         flash(f"Added {usd(int(input_amount))} to your account")
 
-        return render_template("index.html")
+        return redirect("/")
 
 
 def errorhandler(e):
