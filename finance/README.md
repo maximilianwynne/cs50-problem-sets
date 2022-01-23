@@ -11,5 +11,5 @@ Tech Stack/Frameworks:
 
 Additional Features Implemented
 
-- Stocks History table
+- Stocks History Table
 - Add Cash functionality
