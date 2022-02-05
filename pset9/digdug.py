@@ -52,10 +52,38 @@ def move():
             pygame.quit()
             main = False
 
-# create character
+class Hero(Character)
+    def __init__(self):
+        Character.__init__(self, "Hero")
+        self.hurt = pygame.image.load(os.path.join("Assets", "Hero", "digdug_hurt.png")).convert_alpha()
+        self.rect = self.surface.get_rect(centre = (WIDTH/2, HEIGHT/2))
+        self.xspeed = BASE_SPEED
+        self.yspeed = BASE_SPEED
+        self.health = BASE_HEALTH
+
+# when character moves
+    def move(self):
+        # see if keys are being pressed
+        pressed_keys = pygame.key.get_pressed()
+
+        if self.rect.left > 0 and pressed_keys[K_LEFT]:
+            self.rect.move_ip(-BASE_SPEED, 0):
+
+# draw character frame
+
+# create character / test walks
+# i need the actual pngs
 class Character(pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
-        self.walk_anim = [
-
+        self.walk_animation = [
+            pygame.game.load(os.path.join(type, f"{type}_standing.png")).convert_alpha(),
+            pygame.game.load(os.path.join(type, f"{type}_L.png")).convert_alpha(),
+            pygame.game.load(os.path.join(type, f"{type}_standing.png")).convert_alpha(),
+            pygame.game.load(os.path.join(type, f"{type}_R.png")).convert_alpha(),
         ]
+        self.surface = pygame.Surface(100, 150)
+        self.direction = 1 #1 is 'right', 0 is 'left'
+        self.step_count = 0
+
+#
