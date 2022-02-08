@@ -5,6 +5,7 @@ WIDTH = 800
 HEIGHT = 600
 
 background_colour = (234, 212, 252)
+background = pygame.image.load("background.png")
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -40,6 +41,7 @@ class Player(Character):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
             self.rect.y -= self.speed
+            backgroundcoord = 1
         if keys[pygame.K_DOWN]:
             self.rect.y += self.speed
         if keys[pygame.K_LEFT]:
@@ -48,10 +50,13 @@ class Player(Character):
             self.rect.x += self.speed
         super().update()
 
+
 def draw():
     screen.fill(background_colour)
+    screen.blit(background, (0,0))
     sprites.draw(screen)
     pygame.display.flip()
+
 
 sprites = pygame.sprite.Group()
 sprites.add(Player())
