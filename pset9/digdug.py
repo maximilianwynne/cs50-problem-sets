@@ -59,11 +59,15 @@ class Player(Character):
             # pressing down, input y = 1 - add 1 * 1 = speed
             self.rect.y += input_y * self.speed
         if self.rect.y % level.tile_size == 0:
+            # pressing up, input x = 1 + add 1 // 1 = speed
+            self.rect.x -= input_x // self.speed
+
             if keys[pygame.K_LEFT]:
                 self.rect.x -= self.speed
             if keys[pygame.K_RIGHT]:
                 self.rect.x += self.speed
         super().update()
+
 
 
 
