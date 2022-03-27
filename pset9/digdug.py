@@ -1,158 +1,108 @@
 import pygame
-import os
-import csv
-from pygame.rect import Rect
+from sys import exit
 
-WIDTH = 800
-HEIGHT = 600
+def display_score():
+    current_time = int(pygame.time.get_ticks() / 1000) - start_time
+    score_surf = test_font.render(f'Time: {current_time}',False,(64,64,64))
+    score_rect = score_surf.get_rect(center = (400,50))
+    screen.blit(score_surf,score_rect)
 
-background_colour = (234, 212, 252)
-background = pygame.image.load("background.png")
 
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-pygame.display.set_caption('Dig Dug')
+screen = pygame.display.set_mode((800, 400))
+pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
+# correcting font / font type, font size
+test_font = pygame.font.Font('Pixeltype.ttf', 50)
+game_active = False
+start_time = 0
 
-# create character / test walks
-# i need the actual pngs
-class Character(pygame.sprite.Sprite):
-    def __init__(self, type):
-        super().__init__()
-        self.walk_animation = [
-            pygame.image.load(os.path.join("images", f"{type}_standing.png")).convert_alpha(),
-            # pygame.game.load(os.path.join(type, f"{type}_L.png")).convert_alpha(),
-            # pygame.game.load(os.path.join(type, f"{type}_standing.png")).convert_alpha(),
-            # pygame.game.load(os.path.join(type, f"{type}_R.png")).convert_alpha(),
-        ]
-        self.direction = -1 #1 is 'right', 0 is 'left'
-        self.step_count = 0
-        self.image = self.walk_animation[0]
+sky_surface = pygame.image.load('sky.png').convert()
+ground_surface = pygame.image.load('ground.png').convert()
+# text info / anti-alias / colour
 
-    def update(self):
-        # self.image = self.walk_animation[0]
-        pass
+# score_surf = test_font.render('my game', False, (64, 64, 64))
+# centre score text by using rectangles
+# score_rect = score_surf.get_rect(center=(400, 50))
 
-class Player(Character):
-    def __init__(self):
-        Character.__init__(self, "player")
-        # self.hurt = pygame.image.load(os.path.join("Assets", "Hero", "digdug_still.png")).convert_alpha()
-        self.speed = 1
-        # resize character
-        scaled_image = pygame.Surface([level.tile_size, level.tile_size])
-        pygame.transform.scale(self.image, (level.tile_size,level.tile_size), scaled_image)
-        self.image = scaled_image
-        self.rect = self.image.get_rect()
+# set alpha values, respect white and black
+snail_surf = pygame.image.load('snail1.png').convert_alpha()
+snail_rect = snail_surf.get_rect(bottomright=(600, 300))
 
-    def update(self):
-        # see if keys are being pressed
-        keys = pygame.key.get_pressed()
-        # check alignment with tile
-        input_x = 0
-        if keys[pygame.K_UP] or keys[pygame.K_DOWN]:
-            input_x = 1 if keys[pygame.K_DOWN] else -1
-        input_y = 0
-        if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
-            input_y = 1 if keys[pygame.K_RIGHT] else -1
-        if self.rect.x % level.tile_size == 0:
-            # pressing down, input y = 1 - add 1 * 1 = speed
-            self.rect.y += input_y * self.speed
-        if self.rect.y % level.tile_size == 0:
-            # pressing up, input x = 1 + add 1 // 1 = speed
-            self.rect.x -= input_x // self.speed
+player_surf = pygame.image.load('player_walk_1.png').convert_alpha()
+player_rect = player_surf.get_rect(midbottom=(80, 300))
+player_gravity = 0
 
-            if keys[pygame.K_LEFT]:
-                self.rect.x -= self.speed
-            if keys[pygame.K_RIGHT]:
-                self.rect.x += self.speed
-        super().update()
+# intro screen
+player_stand = pygame.image.load('player_stand.png').convert_alpha()
+player_stand = pygame.transform.rotozoom(player_stand,0,2)
+player_stand_rect = player_stand.get_rect(center = (400,200))
+
+def create_surface_with_text(text, font_size, text_rgb, bg_rgb):
+    """ Returns surface with text written on """
+    font = pygame.freetype.SysFont("Runner", font_size, bold=True)
+    return surface.convert_alpha()
 
 
+while True:
+    for event in pygame.event.get() :
+        if event.type == pygame.QUIT :
+            pygame.quit()
+            exit()
+        # make character jump when clicked on
+        # check for mouse button press
+        if game_active:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300:
+                    player_gravity = -20
+            # check mouse position
+            # check if mouse is over player rectangle
+            # if event.type == pygame.MOUSEMOTION:
+            # if player_rect.collidepoint(event.pos): print('collision')
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and player_rect.bottom >= 300:
+                    player_gravity = -20
+        else:
+            # restart game
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                game_active = True
+                snail_rect.left = 800
+                start_time = int(pygame.time.get_ticks() / 1000)
+
+    if game_active:
+        screen.blit(sky_surface, (0, 0))
+        screen.blit(ground_surface, (0, 300))
+        # draw rectangle
+        # pygame.draw.rect(screen, '#c0e8ec', score_rect)
+        # pygame.draw.rect(screen, '#c0e8ec', score_rect, 10)
+        # pygame.draw.ellipse(screen,'Brown',pygame.Rect(50,200,100,100))
+        # pygame.draw.line(screen,'Gold',(0,0),pygame.mouse.get_pos(),10)
+        # screen.blit(score_surf, score_rect)
+        display_score()
+
+        snail_rect.x -= 4
+        # move back to right of screen
+        if snail_rect.right <= 0 : snail_rect.left = 800
+        screen.blit(snail_surf, snail_rect)
+
+        # player
+        player_gravity += 1
+        player_rect.y += player_gravity
+        # keep player grounded, keep above 300
+        if player_rect.bottom >= 300 : player_rect.bottom = 300
+        screen.blit(player_surf, player_rect)
+
+        # collision
+        if snail_rect.colliderect(player_rect):
+            game_active = False
+    else:
+        screen.fill((94,129,162))
+        screen.blit(player_stand,player_stand_rect)
 
 
+    mouse_pos = pygame.mouse.get_pos()
+    if player_rect.collidepoint(mouse_pos):
+        print(pygame.mouse.get_pressed())
 
-# implementing tiles
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, image, x, y):
-        self.image = image
-        pygame.sprite.Sprite.__init__(self)
-        # manual load in: self.image = pygame.image.Load(image)
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x, y
-
-    # helper function: draw the tile
-    def draw(self, surface):
-        surface.blit(self.image, (self.rect.x, self.rect.y))
-
-
-class TileMap():
-    def __init__(self, filename):
-        # initialise tile size
-        self.tile_size = 32
-        # self.map_w, self.map_h = x * self.tile_size, y * self.tile_size
-        self.start_x, self.start_y = 0, 0
-        self.tile_img = pygame.image.load("tile.png")
-        self.map = self.load(filename)
-
-    # display all tiles for each row
-    def draw(self):
-        for row in self.map:
-            for tile in row:
-                tile.draw(screen)
-
-    def load(self, filename):
-        tile_size_original = 16
-        map = []
-        with open(os.path.join(filename)) as file:
-            data = csv.reader(file, delimiter=',')
-            screen_y = self.start_y
-            for row in data:
-                screen_x = self.start_x
-                tile_row = []
-                for number in row:
-                    number = int(number)
-                    if number >= 0:
-                        # get image corresponding from tile
-                        x = tile_size_original * (number % 6)
-                        y = tile_size_original * (number // 6)
-                        tile_surface_original = pygame.surface.Surface((tile_size_original,tile_size_original))
-                        tile_surface_scaled = pygame.surface.Surface((self.tile_size, self.tile_size))
-                        tile_surface_original.blit(self.tile_img, (0, 0), Rect(x,y,tile_size_original,tile_size_original))
-                        pygame.transform.scale(tile_surface_original, (self.tile_size,self.tile_size),tile_surface_scaled)
-                        tile_row.append(Tile(tile_surface_scaled, screen_x, screen_y))
-                    screen_x += self.tile_size
-                map.append(tile_row)
-                screen_y += self.tile_size
-        return map
-
-level = TileMap("map.csv")
-
-
-def draw():
-    screen.fill(background_colour)
-    screen.blit(background, (0,0))
-    level.draw()
-    sprites.draw(screen)
-    pygame.display.flip()
-
-
-sprites = pygame.sprite.Group()
-sprites.add(Player())
-
-clock = pygame.time.Clock()
-
-running = True
-
-# game loop / keep live
-while running:
+    pygame.display.update()
     clock.tick(60)
-
-    # loop through event queue
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    sprites.update()
-
-    draw()
