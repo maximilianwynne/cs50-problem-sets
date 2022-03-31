@@ -50,33 +50,53 @@ class Player(Character):
         keys = pygame.key.get_pressed()
         # check alignment with tile
         input_x = 0
-        if keys[pygame.K_UP] or keys[pygame.K_DOWN]:
-            input_x = 1 if keys[pygame.K_DOWN] else -1
         input_y = 0
+        if keys[pygame.K_UP] or keys[pygame.K_DOWN]:
+            input_y = 1 if keys[pygame.K_DOWN] else -1
         if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
-            input_y = 1 if keys[pygame.K_RIGHT] else -1
-        if self.rect.x % level.tile_size == 0:
-            # pressing down, input y = 1 - add 1 * 1 = speed
-            self.rect.y += input_y * self.speed
-        if self.rect.y % level.tile_size == 0:
-            # pressing up, input x = 1 + add 1 // 1 = speed
-            self.rect.x -= input_x // self.speed
+            input_x = 1 if keys[pygame.K_RIGHT] else -1
 
-            if keys[pygame.K_LEFT]:
-                self.rect.x -= self.speed
-            if keys[pygame.K_RIGHT]:
-                self.rect.x += self.speed
+        new_rect = self.rect.copy()
+
+        # are we aligned with a column?
+        if new_rect.x % level.tile_size == 0:
+            # vertical movement
+            new_rect.y += input_y * self.speed
+
+        # are we aligned with a row?
+        if new_rect.y % level.tile_size == 0:
+            # horizontal movement
+            new_rect.x += input_x * self.speed
+
+        # check for collisions
+        for row in level.map:
+            for row_i in range(len(row)):
+                tile = row[row_i]
+                if tile is not None and new_rect.colliderect(tile):
+                    if tile.is_obstacle:
+                        new_rect = self.rect.copy()
+                    elif tile.is_dirt:
+                        row[row_i] = None
+
+
+
+        self.rect = new_rect
+
         super().update()
+
+
 
 
 # implementing tiles
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, image, x, y):
+    def __init__(self, image, x, y, is_obstacle, is_dirt):
         self.image = image
         pygame.sprite.Sprite.__init__(self)
         # manual load in: self.image = pygame.image.Load(image)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
+        self.is_obstacle = is_obstacle
+        self.is_dirt = is_dirt
 
     # helper function: draw the tile
     def draw(self, surface):
@@ -96,7 +116,8 @@ class TileMap():
     def draw(self):
         for row in self.map:
             for tile in row:
-                tile.draw(screen)
+                if tile is not None:
+                    tile.draw(screen)
 
     def load(self, filename):
         tile_size_original = 16
@@ -117,7 +138,11 @@ class TileMap():
                         tile_surface_scaled = pygame.surface.Surface((self.tile_size, self.tile_size))
                         tile_surface_original.blit(self.tile_img, (0, 0), Rect(x,y,tile_size_original,tile_size_original))
                         pygame.transform.scale(tile_surface_original, (self.tile_size,self.tile_size),tile_surface_scaled)
-                        tile_row.append(Tile(tile_surface_scaled, screen_x, screen_y))
+                        is_obstacle = number == 21
+                        is_dirt = not is_obstacle
+                        tile_row.append(Tile(tile_surface_scaled, screen_x, screen_y, is_obstacle, is_dirt))
+                    else:
+                        tile_row.append(None)
                     screen_x += self.tile_size
                 map.append(tile_row)
                 screen_y += self.tile_size
@@ -125,42 +150,6 @@ class TileMap():
 
 
 level = TileMap("map.csv")
-
-
-# create black tiling
-def create_black_ground(settings,screen,player,type):
-    for x in range(15,45):
-        x = x * 20
-        for y in range(15,35):
-            y = y * 20
-            cell = map(x,y,settings,screen)
-            map.add(cell)
-
-    for item in map.sprites():
-        if item.rect.x == 400 and item.rect.y == 520:
-            map.remove(item)
-
-        if item.rect.x == 400 and item.rect.y == 500:
-            map.remove(item)
-
-
-# make player collision
-#def check_ground_collision(self, player):
-    #collided = pygame.sprite.spritecollideany(player, map)
-    #if collided:
-        #self.remove(collided)
-
-    # collision result
-    #if player.colliderect(player_rect):
-        #game_active = False
-    #else:
-        #screen.fill('Red')
-
-    # mouse_pos = pygame.mouse.get_pos()
-    # if player_rect.collidepoint(mouse_pos):
-        # print(pygame.mouse.get_pressed())
-
-    pygame.display.update()
 
 
 def draw():
