@@ -26,8 +26,6 @@ class Character(pygame.sprite.Sprite):
             # pygame.game.load(os.path.join(type, f"{type}_standing.png")).convert_alpha(),
             # pygame.game.load(os.path.join(type, f"{type}_R.png")).convert_alpha(),
         ]
-        self.direction = -1 #-1 is 'right', 0 is 'left'
-        self.step_count = 0
         self.image = self.walk_animation[0]
 
     def update(self):
@@ -69,21 +67,53 @@ class Player(Character):
             new_rect.x += input_x * self.speed
 
         # check for collisions
+        # row in tiled map
         for row in level.map:
+            # selecting tiles
             for row_i in range(len(row)):
                 tile = row[row_i]
+                # if tile exists and you collide. if tile is dirt, remove dirt tile.
                 if tile is not None and new_rect.colliderect(tile):
                     if tile.is_obstacle:
                         new_rect = self.rect.copy()
                     elif tile.is_dirt:
                         row[row_i] = None
 
-
-
         self.rect = new_rect
 
         super().update()
 
+class Monster(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.image.load(os.path.join("images","player_standing.png")).convert_alpha()
+        scaled_image = pygame.Surface([level.tile_size, level.tile_size])
+        pygame.transform.scale(self.image, (level.tile_size, level.tile_size), scaled_image)
+        self.image = scaled_image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+
+        self.dir_x = 1
+
+    def update(self):
+        new_rect = self.rect.copy()
+        new_rect.x += self.dir_x
+
+        for row in level.map:
+            # selecting tiles
+            for row_i in range(len(row)):
+                tile = row[row_i]
+                # if tile exists and you collide. if tile is dirt, remove dirt tile.
+                if tile is not None and new_rect.colliderect(tile):
+                    new_rect = self.rect.copy()
+                    break
+
+        # turn around when hitting obstacle
+        if new_rect == self.rect:
+            self.dir_x = -self.dir_x
+
+        self.rect = new_rect
 
 
 
@@ -91,7 +121,6 @@ class Player(Character):
 class Tile(pygame.sprite.Sprite):
     def __init__(self, image, x, y, is_obstacle, is_dirt):
         self.image = image
-        pygame.sprite.Sprite.__init__(self)
         # manual load in: self.image = pygame.image.Load(image)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x, y
@@ -138,7 +167,7 @@ class TileMap():
                         tile_surface_scaled = pygame.surface.Surface((self.tile_size, self.tile_size))
                         tile_surface_original.blit(self.tile_img, (0, 0), Rect(x,y,tile_size_original,tile_size_original))
                         pygame.transform.scale(tile_surface_original, (self.tile_size,self.tile_size),tile_surface_scaled)
-                        is_obstacle = number == 21
+                        is_obstacle = number == 21 or 24 <= number <= 45
                         is_dirt = not is_obstacle
                         tile_row.append(Tile(tile_surface_scaled, screen_x, screen_y, is_obstacle, is_dirt))
                     else:
@@ -162,8 +191,10 @@ def draw():
 
 sprites = pygame.sprite.Group()
 sprites.add(Player())
+sprites.add(Monster((64,64)))
 
 clock = pygame.time.Clock()
+
 
 running = True
 
