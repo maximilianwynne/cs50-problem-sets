@@ -8,7 +8,6 @@ WIDTH = 800
 HEIGHT = 600
 
 background_colour = (234, 212, 252)
-background = pygame.image.load("background.png")
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -16,16 +15,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Dig Dug')
 clock = pygame.time.Clock()
 
-#! defining the tile size at the beginning
+# tile size defined in the beginning
 TILE_SIZE = 32
 
-#! it is best to load all images directly in the beginning of the code through pygame.image.load
-CHARACTER_SIZE = TILE_SIZE // 1.25
+# it is better to load all images directly in the beginning i think through pygame.image.load
 MONSTER = pygame.transform.scale(pygame.image.load("images/monster_standing.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
-PLAYER = pygame.transform.scale(pygame.image.load("images/player_standing.png"), (TILE_SIZE // 1.15, TILE_SIZE // 1.15)).convert_alpha()
+PLAYER = pygame.transform.scale(pygame.image.load("images/player_standing.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
 
 # create character / test walks
-# i need the actual pngs
 class Character(pygame.sprite.Sprite):
     def __init__(self, type): #! always define the coordinates in the __init__ function
         super().__init__()
@@ -38,34 +35,27 @@ class Character(pygame.sprite.Sprite):
         self.walk_animation[0].set_colorkey((20, 20, 20))
         self.image = self.walk_animation[0]
 
+    # start walk
     def update(self):
         # self.image = self.walk_animation[0]
         pass
 
-class Player(Character):
+class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, img=PLAYER):
-        Character.__init__(self, "player")
+        super().__init__()
         # self.hurt = pygame.image.load(os.path.join("Assets", "Hero", "digdug_still.png")).convert_alpha()
         self.speed = 1
-        #!
-        self.x = x
-        self.y = y
-        self.img = img
-        self.vel = 2 #! how fast the player moves
-        self.rect = pygame.Rect(self.x, self.y, self.img.get_width(), self.img.get_height())
-        self.can_move_down = True
-        #!
-        # resize character
-        scaled_image = pygame.Surface([level.tile_size, level.tile_size])
-        pygame.transform.scale(self.image, (level.tile_size,level.tile_size), scaled_image)
-        self.image = scaled_image
-        self.rect2 = self.image.get_rect()
+        #
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = 2 # how fast the player moves
 
-    def update2(self): #! your function
+    def update(self):
         
         # see if keys are being pressed
         keys = pygame.key.get_pressed()
-        # check alignment with tile
         input_x = 0
         input_y = 0
         if keys[pygame.K_UP] or keys[pygame.K_DOWN]:
@@ -73,14 +63,15 @@ class Player(Character):
         if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
             input_x = 1 if keys[pygame.K_RIGHT] else -1
 
+        # copy this over to character
         new_rect = self.rect.copy()
 
-        # are we aligned with a column?
+        # check if we are aligned with a column
         if new_rect.x % level.tile_size == 0:
             # vertical movement
             new_rect.y += input_y * self.speed
 
-        # are we aligned with a row?
+        # check if we are aligned with a row
         if new_rect.y % level.tile_size == 0:
             # horizontal movement
             new_rect.x += input_x * self.speed
@@ -102,51 +93,8 @@ class Player(Character):
 
         super().update()
 
-    def draw(self): #! it is best to always draw such objects through an internal draw function which just blits the images at the given coordinates onto the screen
-        screen.blit(self.img, (self.x, self.y)) #! you can also add animations to this later, if you are confused with something, just ask me
 
-    def update(self): #! my updated function
-        if not self.can_move_down: #! this is a little bit more efficient but also a little bit longer to write
-            self.can_move_down = True
-        self.rect = pygame.Rect(self.x, self.y, self.img.get_width(), self.img.get_height())
-        keys = pygame.key.get_pressed()
-
-        for x, row in enumerate(level.map): #! normal checking for collision
-            for y, tile in enumerate(row):
-                if tile != None:
-                    if tile.is_obstacle:
-                        rect = pygame.Rect(self.rect.x, self.rect.y + self.vel, self.rect.width, self.rect.height) #! new rect for future collision checking
-                    else:
-                        rect = self.rect
-                    if rect.colliderect(tile.rect): #! no mask collision because rects work just fine too
-                        if tile.is_obstacle:
-                            self.can_move_down = False #! if player will collide with obstacle then he cant move in that direction (down)
-                        else:
-                            level.map[x][y] = None
-
-        if self.x % level.tile_size >= 0 and self.x % TILE_SIZE <= TILE_SIZE - self.img.get_width(): #! same as your function, just changed the movement a litle bit
-            if keys[pygame.K_UP]:
-                self.y -= self.vel #! changing x, y directly, not in rect
-                if self.y < 0:
-                    self.y += self.vel
-            elif keys[pygame.K_DOWN]:
-                if self.can_move_down:
-                    self.y += self.vel
-                    if self.y > HEIGHT:
-                        self.y -= self.vel
-        if self.y % level.tile_size >= 0 and self.y % TILE_SIZE <= TILE_SIZE - self.img.get_height():
-            if keys[pygame.K_RIGHT]:
-                self.x += self.vel
-                if self.x > WIDTH:
-                    self.x -= self.vel
-            elif keys[pygame.K_LEFT]:
-                self.x -= self.vel
-                if self.x < 0:
-                    self.x += self.vel
-
-
-
-class Monster(pygame.sprite.Sprite): #! your monster
+class Monster(pygame.sprite.Sprite): # monster class
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load(os.path.join("images","monster_standing.png")).convert_alpha()
@@ -173,7 +121,7 @@ class Monster(pygame.sprite.Sprite): #! your monster
                     new_rect = self.rect.copy()
                     break
 
-        # turn around when hitting obstacle
+        # turn around when hitting obstacle / i think this is how you reverse direction
         if new_rect == self.rect:
             self.dir_x = -self.dir_x
 
@@ -193,7 +141,7 @@ class Monster(pygame.sprite.Sprite): #! your monster
         self.rect = new_rect
 
 
-class Monster2: #! my updated monster
+class Monster2: # updated monster function
     def __init__(self, x, y, movementx, movementy, img=MONSTER):
         self.x = x
         self.y = y
@@ -207,7 +155,7 @@ class Monster2: #! my updated monster
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
     
-    def move(self): #! moving directly through coordinates
+    def move(self): # moving directly through coordinates
         self.x += self.movementx
         self.y += self.movementy
         self.rect = pygame.Rect(self.x, self.y, self.img.get_width(), self.img.get_height())
@@ -216,18 +164,18 @@ class Monster2: #! my updated monster
             for y, tile in enumerate(row):
                 if tile != None:
                     if self.rect.colliderect(tile.rect):
-                        self.movementx = - self.movementx
+                        self.movementx =- self.movementx
 
         if self.x >= WIDTH - self.img.get_width() and self.movementx > 0 or self.x <= 0 and self.movementx < 0:
             self.movementx = - self.movementx
 
-        if self.y >= HEIGHT - self.img.get_height()  and self.movementy > 0 or self.y <= 0 and self.movementy < 0:
+        if self.y >= HEIGHT - self.img.get_height() and self.movementy > 0 or self.y <= 0 and self.movementy < 0:
             self.movementy = - self.movementy
 
 
-    def offset(self, target): #! checking offset and moving based on it
-        offsetx = self.ix - target.x
-        offsety = self.iy - target.y
+    def offset(self, target): # checking offset and moving based on it
+        offsetx = self.ix - target.rect.x
+        offsety = self.iy - target.rect.y
         if offsetx <= TILE_SIZE * 4 and offsetx > 0 and offsety <= TILE_SIZE * 3 and offsety > -TILE_SIZE * 4:
             if offsety > 0:
                 multi = -offsety
@@ -249,7 +197,7 @@ class Monster2: #! my updated monster
 
 
 # implementing tiles
-class Tile(): #! I wont change the class here, there is nothing to change here, really.
+class Tile():
     def __init__(self, image, x, y, is_obstacle, is_dirt):
         self.image = image
         # manual load in: self.image = pygame.image.Load(image)
@@ -280,7 +228,7 @@ class TileMap():
                 if tile is not None:
                     tile.draw(screen)
 
-    def load(self, filename): #! I am too tired to rewrite a part of that now
+    def load(self, filename): # this should be rewritten
         tile_size_original = 16
         map = []
         with open(os.path.join(filename)) as file:
@@ -293,7 +241,7 @@ class TileMap():
                     number = int(number)
                     if number >= 0:
                         # get image corresponding from tile 
-                        x = tile_size_original * (number % 6) #! this is rather not efficient but since you run that only once in your code its fine
+                        x = tile_size_original * (number % 6) # this is rather not efficient i think but it is run only once
                         y = tile_size_original * (number // 6)
                         tile_surface_original = pygame.surface.Surface((tile_size_original,tile_size_original))
                         tile_surface_scaled = pygame.surface.Surface((self.tile_size, self.tile_size))
@@ -317,7 +265,7 @@ def draw():
     #screen.blit(background, (0,0))
     level.draw()
     monster.draw()
-    player.draw()
+    all_sprites.draw(screen)
     pygame.display.flip()
 
 next_obstacle = HEIGHT
@@ -328,10 +276,13 @@ for row in level.map:
                 next_obstacle = tile.rect.y
                 break
 
-player = Player(CHARACTER_SIZE // 8, CHARACTER_SIZE // 8)
+player = Player(0,0)
 monsterx = random.randrange(0, WIDTH - TILE_SIZE * 3, TILE_SIZE)
 monstery = random.randrange(0, next_obstacle - TILE_SIZE * 3, TILE_SIZE)
 monster = Monster2(monsterx, monstery, 1, 0)
+
+all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
 
 level.map[0][0] = None
 for x, row in enumerate(level.map):
