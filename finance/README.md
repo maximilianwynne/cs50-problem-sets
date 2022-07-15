@@ -1,6 +1,6 @@
 Finance Web App
 
-Website application which manages portfolios of stocks.
+Website application which manages personal stock portfolios. 
 
 Tech Stack/Frameworks:
 
@@ -11,5 +11,5 @@ Tech Stack/Frameworks:
 
 Additional Features Implemented
 
-- Stocks History Table
-- Add Cash functionality
+- Stocks Purchase History Table
+- Add Cash for Wallet functionality
