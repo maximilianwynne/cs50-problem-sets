@@ -21,7 +21,7 @@ TILE_SIZE = 32
 
 MONSTER = pygame.transform.scale(pygame.image.load("images/monster_standing.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
 PLAYER = pygame.transform.scale(pygame.image.load("images/playerDigging1.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
-PLAYER_LIVES = pygame.transform.scale(PLAYER, (PLAYER.get_width() / 1.1, PLAYER.get_height() / 1.1))
+PLAYER_LIVES = pygame.transform.scale(PLAYER, (PLAYER.get_width() / 1.0, PLAYER.get_height() / 1.0))
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, type):
@@ -159,8 +159,13 @@ class Coin(pygame.sprite.Sprite):
 
         self.image = pygame.image.load("images/Coin.png")
         self.rect = self.image.get_rect()
-
         self.rect.topleft = pos
+
+        # resize coin image
+        self.image = pygame.transform.scale(self.image, (30,30))
+
+        # set numerous coins to pick up on map
+
 
 
 class Monster(pygame.sprite.Sprite):
@@ -392,20 +397,19 @@ def game():
         monsters.append(monster)
         all_sprites.add(monster)
 
-    coins = []
-    coins.append(Coin((50,50)))
+    coins = [Coin((50, 50))]
     all_sprites.add(coins[0])
 
     level.map[0][0] = None
-    for x, row in enumerate(level.map) :
-        for y, tile in enumerate(row) :
+    for x, row in enumerate(level.map):
+        for y, tile in enumerate(row):
             if tile != None:
                 for monster in monsters:
-                    if tile.rect.x == monster.rect.x and tile.rect.y == monster.rect.y :
+                    if tile.rect.x == monster.rect.x and tile.rect.y == monster.rect.y:
                         level.map[x][y] = None
-                        if monster.movementy != 0 :
+                        if monster.movementy != 0:
                             level.map[x + 1][y] = level.map[x + 2][y] = None
-                        elif monster.movementx != 0 :
+                        elif monster.movementx != 0:
                             level.map[x][y + 1] = level.map[x][y + 2] = None
 
     # game loop / keep live
