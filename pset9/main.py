@@ -5,6 +5,8 @@ import csv
 import math
 from pygame.rect import Rect
 
+NUM_MONSTERS = 25
+
 WIDTH = 800
 HEIGHT = 600
 
@@ -17,14 +19,15 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Dig Dug')
 clock = pygame.time.Clock()
 
-
 TILE_SIZE = 32
 
-MONSTER = pygame.transform.scale(pygame.image.load("images/monster_standing.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
+MONSTER = pygame.transform.scale(pygame.image.load("images/monster_standing.png"),
+                                 (TILE_SIZE, TILE_SIZE)).convert_alpha()
 PLAYER = pygame.transform.scale(pygame.image.load("images/playerDigging1.png"), (TILE_SIZE, TILE_SIZE)).convert_alpha()
 PLAYER_LIVES = pygame.transform.scale(PLAYER, (PLAYER.get_width() / 1.0, PLAYER.get_height() / 1.0))
 
 coin_sound = pygame.mixer.Sound("sounds/166184__drminky__retro-coin-collect.wav")
+
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, type):
@@ -41,12 +44,16 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.walk_animation = [
             [
-                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging1.png")), (TILE_SIZE, TILE_SIZE)).convert_alpha(),
-                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging2.png")), (TILE_SIZE, TILE_SIZE)).convert_alpha()
+                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging1.png")),
+                                       (TILE_SIZE, TILE_SIZE)).convert_alpha(),
+                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging2.png")),
+                                       (TILE_SIZE, TILE_SIZE)).convert_alpha()
             ],
             [
-                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging1Rotated.png")), (TILE_SIZE, TILE_SIZE)).convert_alpha(),
-                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging2Rotated.png")), (TILE_SIZE, TILE_SIZE)).convert_alpha()
+                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging1Rotated.png")),
+                                       (TILE_SIZE, TILE_SIZE)).convert_alpha(),
+                pygame.transform.scale(pygame.image.load(os.path.join("images", f"playerDigging2Rotated.png")),
+                                       (TILE_SIZE, TILE_SIZE)).convert_alpha()
             ]
         ]
         # self.hurt = pygame.image.load(os.path.join("Assets", "Hero", "digdug_still.png")).convert_alpha()
@@ -87,9 +94,9 @@ class Player(pygame.sprite.Sprite):
             self.flipx = False
             self.flipy = True
             input_y = self.speed
-            
+
             moving = True
-        
+
         if keys[pygame.K_LEFT]:
             input_x = -self.speed
             self.current = 0
@@ -97,7 +104,7 @@ class Player(pygame.sprite.Sprite):
             self.flipx = True
 
             moving = True
-            
+
         if keys[pygame.K_RIGHT]:
             input_x = self.speed
             self.current = 0
@@ -134,10 +141,10 @@ class Player(pygame.sprite.Sprite):
             self.current_img += 0.1
             if self.current_img >= len(self.walk_animation):
                 self.current_img = 0
-        self.image = pygame.transform.flip(self.walk_animation[self.current][int(self.current_img)], self.flipx, self.flipy)
+        self.image = pygame.transform.flip(self.walk_animation[self.current][int(self.current_img)], self.flipx,
+                                           self.flipy)
 
         super().update()
-
 
     def attack(self):
         self.cooldown()
@@ -166,6 +173,7 @@ class Coin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
 
+
 def add_coins(n):
     # put coins in list, return
     coins = []
@@ -177,22 +185,20 @@ def add_coins(n):
             ok = True
             # if difference between two points is less than 80 pixels, place coin
             for coin in coins:
-                if math.dist((x,y), coin.rect.topleft) < 80:
+                if math.dist((x, y), coin.rect.topleft) < 80:
                     ok = False
                     break
             if not ok:
                 continue
-            coins.append(Coin((x,y)))
+            coins.append(Coin((x, y)))
             break
     return coins
-
-
-
 
 
 class Monster(pygame.sprite.Sprite):
     def __init__(self, x, y, movementx, movementy, img=MONSTER):
         super().__init__()
+        self.direction = None
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -209,11 +215,13 @@ class Monster(pygame.sprite.Sprite):
         self.rect.x += self.movementx
         self.rect.y += self.movementy
 
+        # change direction if we hit a tile
         for row in level:
             for tile in row:
                 if tile != None:
                     if self.rect.colliderect(tile.rect):
-                        self.movementx = - self.movementx
+                        self.movementx = -self.movementx
+                        self.movementy = -self.movementy
 
         if self.rect.x >= WIDTH - self.rect.width and self.movementx > 0 or self.rect.x <= 0 and self.movementx < 0:
             self.movementx = - self.movementx
@@ -221,22 +229,51 @@ class Monster(pygame.sprite.Sprite):
         if self.rect.y >= HEIGHT - self.rect.height and self.movementy > 0 or self.rect.y <= 0 and self.movementy < 0:
             self.movementy = - self.movementy
 
-    def offset(self, target):
-        offsetx = self.ix - target.rect.x
-        offsety = self.iy - target.rect.y
-        if offsetx <= TILE_SIZE * 4 and offsetx > 0 and offsety <= TILE_SIZE * 3 and offsety > -TILE_SIZE * 4 :
-            if offsety > 0:
-                multi = -offsety
-            else:
-                multi = offsety
-            if self.rect.x >= self.ix + TILE_SIZE * 1.5 + ((offsetx - TILE_SIZE * 4) // 2) - (
-                    (multi - TILE_SIZE * 4) // 10) and self.movementx > 0 :
-                self.movementx = -self.movementx
-        if offsetx >= -TILE_SIZE * 4 and offsetx < 0 and offsety <= TILE_SIZE * 3 and offsety > -TILE_SIZE * 4 :
-            if self.rect.x <= self.ix + TILE_SIZE and self.movementx < 0 :
-                self.movementx = -self.movementx
+        # are we aligned with grid position
+        if self.rect.x % TILE_SIZE == 0 and self.rect.y % TILE_SIZE == 0:
+            self.choose_direction(level)
 
-        return offsetx, offsety
+    def choose_direction(self, level):
+        valid_exits = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        # index
+        for i in range(len(valid_exits)-1, -1, -1):
+            # find tile coordinates to see if this tile is a valid exit
+            tile_x = self.rect.x + TILE_SIZE * valid_exits[i][0]
+            tile_y = self.rect.y + TILE_SIZE * valid_exits[i][1]
+            # see if there is a tile at tilex and tiley
+            grid_x = tile_x // TILE_SIZE
+            grid_y = tile_y // TILE_SIZE
+            if level[grid_y][grid_x] is not None:
+                del valid_exits[i]
+
+        if len(valid_exits) == 0:
+            return
+        # if there is 1 available exit, don't go back on yourself
+        elif len(valid_exits) > 1:
+            for i in range(len(valid_exits) - 1, -1, -1):
+                if valid_exits[i] == (-self.movementx, -self.movementy):
+                    del valid_exits[i]
+
+        chosen_exit = random.choice(valid_exits)
+        self.movementx = chosen_exit[0]
+        self.movementy = chosen_exit[1]
+
+    # def offset(self, target):
+    #     offsetx = self.ix - target.rect.x
+    #     offsety = self.iy - target.rect.y
+    #     if offsetx <= TILE_SIZE * 4 and offsetx > 0 and offsety <= TILE_SIZE * 3 and offsety > -TILE_SIZE * 4:
+    #         if offsety > 0:
+    #             multi = -offsety
+    #         else:
+    #             multi = offsety
+    #         if self.rect.x >= self.ix + TILE_SIZE * 1.5 + ((offsetx - TILE_SIZE * 4) // 2) - (
+    #                 (multi - TILE_SIZE * 4) // 10) and self.movementx > 0:
+    #             self.movementx = -self.movementx
+    #     if offsetx >= -TILE_SIZE * 4 and offsetx < 0 and offsety <= TILE_SIZE * 3 and offsety > -TILE_SIZE * 4:
+    #         if self.rect.x <= self.ix + TILE_SIZE and self.movementx < 0:
+    #             self.movementx = -self.movementx
+    #
+    #     return offsetx, offsety
 
     def player_collision(self, player):
         if self.rect.colliderect(player.rect):
@@ -281,7 +318,7 @@ class TileMap():
         with open(os.path.join(filename)) as file:
             data = csv.reader(file, delimiter=',')
             screen_y = self.start_y
-            for row in data :
+            for row in data:
                 screen_x = self.start_x
                 tile_row = []
                 for number in row:
@@ -289,7 +326,7 @@ class TileMap():
                     if number >= 0:
                         # get image corresponding from tile
                         x = tile_size_original * (
-                                    number % 6)  # this is rather not efficient i think but it is run only once
+                                number % 6)  # this is rather not efficient i think but it is run only once
                         y = tile_size_original * (number // 6)
                         tile_surface_original = pygame.surface.Surface((tile_size_original, tile_size_original))
                         tile_surface_scaled = pygame.surface.Surface((TILE_SIZE, TILE_SIZE))
@@ -300,12 +337,13 @@ class TileMap():
                         is_obstacle = number == 21 or 24 <= number <= 45
                         is_dirt = not is_obstacle
                         tile_row.append(Tile(tile_surface_scaled, screen_x, screen_y, is_obstacle, is_dirt))
-                    else :
+                    else:
                         tile_row.append(None)
                     screen_x += TILE_SIZE
                 map.append(tile_row)
                 screen_y += TILE_SIZE
         return map
+
 
 # button
 class Button(pygame.Rect):
@@ -320,7 +358,8 @@ class Button(pygame.Rect):
 
     def draw(self):
         pygame.draw.rect(screen, self.color, self.rect)
-        screen.blit(self.text_surf, (self.x + self.width / 2 - self.text_surf.get_width() / 2, self.y + self.height / 2 - self.text_surf.get_height() / 2))
+        screen.blit(self.text_surf, (self.x + self.width / 2 - self.text_surf.get_width() / 2,
+                                     self.y + self.height / 2 - self.text_surf.get_height() / 2))
         if self.outline:
             pygame.draw.rect(screen, self.outline, self.rect, self.outline_width)
 
@@ -334,17 +373,19 @@ class Button(pygame.Rect):
 livesText = font.render("Lives: ", 1, (255, 255, 255))
 scoreText = font.render("SCORE", 1, (255, 255, 255))
 
+
 def draw(all_sprites, monsters, score, lives, level):
     screen.fill((0, 0, 0))
     # screen.fill(background_colour)
     # screen.blit(background, (0,0))
     level.draw()
     all_sprites.draw(screen)
-    
+
     # draw lives
     screen.blit(livesText, (0, HEIGHT - livesText.get_height()))
     for i in range(lives):
-        screen.blit(PLAYER_LIVES, (PLAYER_LIVES.get_height() * 1.1 * i + livesText.get_width(), HEIGHT - PLAYER_LIVES.get_height()))
+        screen.blit(PLAYER_LIVES,
+                    (PLAYER_LIVES.get_height() * 1.1 * i + livesText.get_width(), HEIGHT - PLAYER_LIVES.get_height()))
 
     # score
     scoreSurf = font.render(str(score), 1, (255, 255, 255))
@@ -356,7 +397,7 @@ def draw(all_sprites, monsters, score, lives, level):
 # main menu
 def main_menu():
     global clock
-    
+
     DigDug = font.render("Dig Dug", 1, (0, 0, 0))
     playButton = Button(WIDTH / 2 - 100, HEIGHT / 2 - 90, 200, 50, (0, 255, 0), "Play", (0, 0, 0))
     exitButton = Button(WIDTH / 2 - 100, HEIGHT / 2 + 40, 200, 50, (255, 0, 0), "Exit", (0, 0, 0))
@@ -380,12 +421,15 @@ def main_menu():
                 elif exitButton.click():
                     quit()
 
+
 # main game
 
 score = 0
 lives = 3
+sides = []
 
 running = True
+
 
 def game():
     global running, score, lives, clock
@@ -408,7 +452,7 @@ def game():
 
     monsters = []
     blocked_pos = []
-    for _ in range(5):
+    for _ in range(NUM_MONSTERS):
         monsterx = random.randrange(0, WIDTH - TILE_SIZE * 3, TILE_SIZE)
         monstery = random.randrange(0, next_obstacle - TILE_SIZE * 3, TILE_SIZE)
         while (monsterx / TILE_SIZE, monstery) in blocked_pos:
@@ -442,9 +486,9 @@ def game():
         player.update(level.map)
 
         # loop through monsters
-        for monster in monsters[:]:
+        for monster in monsters:
             monster.move(level.map)
-            monster.offset(player)
+            # monster.offset(player)
             col = monster.player_collision(player)
             if col and not player.attacking:
                 lives -= 1
