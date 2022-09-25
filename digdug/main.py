@@ -5,7 +5,7 @@ import csv
 import math
 from pygame.rect import Rect
 
-NUM_MONSTERS = 19
+NUM_MONSTERS = 20
 
 WIDTH = 800
 HEIGHT = 600
@@ -13,7 +13,7 @@ HEIGHT = 600
 background_colour = (234, 212, 252)
 
 pygame.init()
-font = pygame.font.SysFont("sans-serif", 40)
+font = pygame.font.SysFont("sans-serif", 20)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 pygame.display.set_caption('Dig Dug')
@@ -168,30 +168,46 @@ class Coin(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
 
-        self.image = pygame.image.load("images/Coin.png")
+        self.image = pygame.image.load("images/coin_1.gif")
         self.image = pygame.transform.scale(self.image, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
 
 
-def add_coins(n):
-    # put coins in list, return
-    coins = []
-    for i in range(n):
-        # multiple coins
-        for j in range(20):
-            x = random.randrange(0, WIDTH - 1, TILE_SIZE)
-            y = random.randrange(0, HEIGHT - 1, TILE_SIZE)
+def get_random_available_tile(distances = None, distance_tiles = 0):
+    BAD_TILES = [(16, 8), (17, 8), (16, 9), (17, 9)]
+    for j in range(20):
+        x = random.randrange(0, WIDTH - 1, TILE_SIZE)
+        y = random.randrange(0, HEIGHT - 180, TILE_SIZE)
+
+        tile = (x // 32, y // 32)
+        if tile in BAD_TILES:
+            print("dodge the rock")
+            continue
+
+        if distances:
             ok = True
             # if difference between two points is less than 80 pixels, place coin
-            for coin in coins:
-                if math.dist((x, y), coin.rect.topleft) < 80:
+            for dist in distances:
+                if math.dist((x, y), dist) < distance_tiles * 32:
                     ok = False
                     break
             if not ok:
                 continue
-            coins.append(Coin((x, y)))
-            break
+
+        return x, y
+
+def add_coins(n):
+    # put coins in list, return
+    coins = []
+    distances = []
+    for i in range(n):
+        # multiple coins
+        x, y = get_random_available_tile(distances, 3)
+        coins.append(Coin((x, y)))
+        distances.append((x, y))
+
+
     return coins
 
 
@@ -301,7 +317,7 @@ class TileMap():
     def __init__(self, filename):
         # self.map_w, self.map_h = x * self.tile_size, y * self.tile_size
         self.start_x, self.start_y = 0, 0
-        self.tile_img = pygame.image.load("tile.png")
+        self.tile_img = pygame.image.load("images/tile.png")
         self.filename = filename
         self.map = self.load(self.filename)
 
@@ -391,6 +407,12 @@ def draw(all_sprites, monsters, score, lives, level):
     scoreSurf = font.render(str(score), 1, (255, 255, 255))
     screen.blit(scoreText, (WIDTH / 2 - scoreText.get_width() / 2, 0))
     screen.blit(scoreSurf, (WIDTH / 2 - scoreSurf.get_width() / 2, scoreText.get_height()))
+
+    #for x in range(25):
+    #    for y in range(18):
+    #        pygame.draw.rect(screen, (0, 0, 255), (x*32, y*32, 30, 30))
+    #        surf = font.render(str(x)+","+str(y), 1, (255, 255, 255))
+    #        screen.blit(surf, (x*32, y*32))
     pygame.display.flip()
 
 
@@ -446,15 +468,15 @@ def game():
 
     all_sprites = pygame.sprite.Group()
 
-    player = Player(0, 0)
 
-    all_sprites.add(player)
 
     monsters = []
+    monster_positions = []
     blocked_pos = []
     for _ in range(NUM_MONSTERS):
         monsterx = random.randrange(0, WIDTH - TILE_SIZE * 3, TILE_SIZE)
         monstery = random.randrange(0, next_obstacle - TILE_SIZE * 3, TILE_SIZE)
+        monster_positions.append((monsterx, monstery))
         while (monsterx / TILE_SIZE, monstery) in blocked_pos:
             monsterx = random.randrange(0, WIDTH - TILE_SIZE * 3, TILE_SIZE)
             monstery = random.randrange(0, next_obstacle - TILE_SIZE * 3, TILE_SIZE)
@@ -462,6 +484,12 @@ def game():
         blocked_pos.append((monsterx / TILE_SIZE, monstery))
         monsters.append(monster)
         all_sprites.add(monster)
+
+
+    px, py = get_random_available_tile(monster_positions, distance_tiles=4)
+    player = Player(px, py)
+
+    all_sprites.add(player)
 
     coins = add_coins(10)
     all_sprites.add(coins)
@@ -517,6 +545,8 @@ def game():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 player.attacking = True
 
+        #for i in all_sprites:
+        #    print(i)
         draw(all_sprites, monsters, score, lives, level)
 
 
